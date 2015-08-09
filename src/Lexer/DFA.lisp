@@ -118,7 +118,7 @@
         (make-instance 'Token :type 'CHAR :value ans))))
 
 (defun emit-char (str)
-  (make-instance 'Token :type 'CHAR :value (char-code (coerce str 'char))))
+  (make-instance 'Token :type 'CHAR :value (char-code (coerce str 'character))))
 
 (defun make-number (ls base ex)
   (let* ((ex2 (expt 2 (- ex 1)))
