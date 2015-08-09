@@ -1,7 +1,7 @@
 (load "src/Utils.lisp")
-(load "src/Parser/Token.lisp")
-(load "src/Parser/DFA.lisp")
-(load "src/Parser/Parser.lisp")
+(load "src/Lexer/Token.lisp")
+(load "src/Lexer/DFA.lisp")
+(load "src/Lexer/Lexer.lisp")
 
 (defun start (stream)
   (let ((ans (parse-next-token stream)))
