@@ -201,18 +201,22 @@
 
 (defmacro defnum-state (name base oracle)
   (let ((g (gensym))
-        (under (gensym)))
+        (under (gensym))
+        (main (gensym)))
     `(progn
       (declaim (ftype function ,under))
-      (defstate ,name ch str
+      (defstate ,main ch str
         (,oracle record)
         (is #\l emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
         (is #\L emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
         (is #\_ nextm ,under)
         (T emit-with (lambda (,g) (make-number ,base 64 ,g))))
+      (defstate ,name ch str
+        (,oracle gotom ,main)
+        (T NIL))
       (defstate ,under ch str
         (is #\_ nextm ,under)
-        (,oracle gotom ,name)
+        (,oracle gotom ,main)
         (T NIL)))))
 
 (defnum-state decnum-state 10 digit-char-p)
