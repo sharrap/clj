@@ -296,8 +296,12 @@
   (is #\' (srecord #\'))
   (T NIL))
 
+(defstate emit-string-state ch str
+  (is #\# emit 'STRING) ;Suppress unused warnings
+  (T emit 'STRING))
+
 (defstate string-state ch str
-  (is #\" emit 'STRING)
+  (is #\" nextm emit-string-state)
   (is #\\ nextm escaped-string-state)
   (T record))
 
