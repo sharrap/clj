@@ -142,14 +142,16 @@
          `(make-instance 'Token :type ,(cadr arg)
              :value ,(if mem `(concatenate 'string (reverse ,mem)) NIL)))
         ((eql (car arg) 'emit-d)
-         `(lambda (_) _
-             (make-instance 'Token :type ,(cadr arg)
-                :value ,(if mem `(concatenate 'string (reverse ,mem)) 'NIL))))
+         (let ((_ (gensym)))
+           `(lambda (,_) ,_
+              (make-instance 'Token :type ,(cadr arg)
+                 :value ,(if mem `(concatenate 'string (reverse ,mem)) 'NIL)))))
         ((eql (car arg) 'emit-with)
          `(,(cadr arg) (concatenate 'string (reverse ,mem))))
         ((eql (car arg) 'emit-with-d)
-         `(lambda (_) _
-             (,(cadr arg) (concatenate 'string (reverse ,mem)))))
+         (let ((_ (gensym)))
+          `(lambda (,_) ,_
+              (,(cadr arg) (concatenate 'string (reverse ,mem))))))
         ((eql (car arg) 'gotom)
          `(,(cadr arg) ,mem ,ch))
         ((eql (car arg) 'nextm)
