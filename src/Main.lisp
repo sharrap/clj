@@ -6,7 +6,9 @@
 (defun start (stream)
   (let ((ans (parse-next-token stream)))
     (if ans
-        (progn (print ans) (start stream))
+        (progn (format T "Token Name: ~a, Value: ~a"
+                           (token-type ans) (token-value ans))
+               (start stream))
         NIL)))
 
 (defun main ()
