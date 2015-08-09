@@ -2,6 +2,9 @@
 (load "src/Lexer/Token.lisp")
 (load "src/Lexer/DFA.lisp")
 (load "src/Lexer/Lexer.lisp")
+(load "src/Parser/TreeNode.lisp")
+(load "src/Parser/LR1.lisp")
+(load "src/Parser/Parser.lisp")
 
 (defun start (stream)
   (let ((ans (lex-next-token stream)))

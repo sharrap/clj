@@ -2,6 +2,9 @@
   (lambda (&rest args2)
     (apply fn (append args args2))))
 
+(defun take (n ls)
+  (if (zerop n) NIL (cons (car ls) (take (- n 1) (cdr ls)))))
+
 (defclass istream ()
   ((stream :accessor istream-stream :initform NIL :initarg :stream)
    (top :accessor istream-top :initform NIL :initarg :top)))
