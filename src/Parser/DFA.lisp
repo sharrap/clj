@@ -146,6 +146,10 @@
              `(make-instance 'Token :type ,(cadr arg)
                              :value (concatenate 'string (reverse ,mem)))
              `(make-instance 'Token :type ,(cadr arg) :value NIL)))
+        ((eql (car arg) 'emit-d)
+         `(lambda (_) _
+             (make-instance 'Token :type ,(cadr arg)
+                :value ,(if mem `(concatenate 'string (reverse ,mem)) 'NIL))))
         ((eql (car arg) 'emit-with)
          `(,(cadr arg) (concatenate 'string (reverse ,mem))))
         ((eql (car arg) 'emit-with-d)
@@ -264,7 +268,7 @@
   (T record))
 
 (defstate block-comment-end-state ch str
-  (is #\/ emit 'COMMENT)
+  (is #\/ emit-d 'COMMENT)
   (T (block-comment-state (cons #\* str) ch)))
 
 (defstate operator-state ch str
