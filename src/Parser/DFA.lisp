@@ -82,7 +82,7 @@
         (make-instance 'Token :type 'CHAR :value ans))))
 
 (defun emit-char (str)
-  (make-instance 'Token :type 'CHAR :value (char-code (car str))))
+  (make-instance 'Token :type 'CHAR :value (char-code (char str 0))))
 
 (defun make-number (ls base ex)
   (let* ((ex2 (expt 2 (- ex 1)))
@@ -112,6 +112,9 @@
              `(make-instance 'Token :type ,(cadr arg) :value NIL)))
         ((eql (car arg) 'emit-with)
          `(,(cadr arg) (concatenate 'string (reverse ,mem))))
+        ((eql (car arg) 'emit-with-d)
+         `(lambda (_) _
+             (,(cadr arg) (concatenate 'string (reverse ,mem)))))
         ((eql (car arg) 'gotom)
          (if mem
              `(,(cadr arg) ,mem ,ch)
@@ -167,8 +170,7 @@
 
 (defmacro deflongnum-state (name base)
   `(defstate ,name ch str
-     (is #\# (make-number str ,base 64)) ;Suppress unused variable warnings
-     (T (make-number str ,base 64))))
+     (T (progn ch (make-number str ,base 64)))))
 
 (deflongnum-state longdec-state 10)
 (deflongnum-state longoct-state 8)
@@ -247,8 +249,8 @@
     ("|=" 'OREQ))))
 
 (defstate separator-state ch NIL
-  (is #\# emit-with emit-separator) ;Suppress unused variable warnings
-  (T emit-with emit-separator))
+  (is #\\ emit-with-d emit-separator) ;Suppress unused warning
+  (T emit-with-d emit-separator))
 
 (defstate line-comment-state ch str
   (is #\linefeed emit 'COMMENT)
@@ -306,7 +308,7 @@
   (T record))
 
 (defstate done-char-state ch str
-  (is #\' emit-with emit-char)
+  (is #\' emit-with-d emit-char)
   (T NIL))
 
 (defmacro crecord (ch)
@@ -314,13 +316,13 @@
 
 (defstate octal-char-state ch str
   (oct-digit-p record)
-  (is #\' emit-with emit-oct)
+  (is #\' emit-with-d emit-oct)
   (T NIL))
 
 (defstate unicode-char-state ch str
   (is #\u nextm unicode-char-state)
   (hex-digit-p record)
-  (is #\' emit-with emit-unicode)
+  (is #\' emit-with-d emit-unicode)
   (T NIL))
 
 (defstate escaped-char-state ch NIL
@@ -350,6 +352,6 @@
   (in +operators+ (curry #'operator-state (list ch)))
   (in +separators+ (separator-state ch))
   (is #\" nextm string-state)
-  (is #\' nextm char-state)
+  (is #\' #'char-state)
   (space-char-p #'start-state)
   (T NIL))
