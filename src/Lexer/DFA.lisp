@@ -123,9 +123,8 @@
 (defun emit-char (str)
   (make-instance 'Token :type 'CHAR :value (char-code (coerce str 'character))))
 
-(defun make-number (base ex ls)
+(defun make-number (base ex str)
   (let* ((ex2 (expt 2 (- ex 1)))
-         (str (concatenate 'string (reverse ls)))
          (ans (parse-integer str :radix base)))
     (cond ((and (>= ans ex2) (<= ans (* 2 ex2)) (not (eql base 10)))
            (make-instance 'Token :type 'NUMLIT :value (- ans (* 2 ex2))))
@@ -158,7 +157,7 @@
         ((eql (car arg) 'gotom)
          `(,(cadr arg) ,mem ,ch))
         ((eql (car arg) 'nextm)
-         `(curry (function ,(cadr arg)) NIL))
+         `(curry (function ,(cadr arg)) ,mem))
         (T (car arg))))
 
 (defun defstate-args (name ch mem arg)
@@ -201,12 +200,20 @@
   (T emit 'ANNOTATION))
 
 (defmacro defnum-state (name base oracle)
-  (let ((g (gensym)))
-    `(defstate ,name ch str
-       (,oracle record)
-       (is #\l emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
-       (is #\L emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
-       (T emit-with (lambda (,g) (make-number ,base 64 ,g))))))
+  (let ((g (gensym))
+        (under (gensym)))
+    `(progn
+      (declaim (ftype function ,under))
+      (defstate ,name ch str
+        (,oracle record)
+        (is #\l emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
+        (is #\L emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
+        (is #\_ nextm ,under)
+        (T emit-with (lambda (,g) (make-number ,base 64 ,g))))
+      (defstate ,under ch str
+        (is #\_ nextm ,under)
+        (,oracle gotom ,name)
+        (T NIL)))))
 
 (defnum-state decnum-state 10 digit-char-p)
 (defnum-state octnum-state 8 oct-digit-p)
@@ -336,7 +343,7 @@
   (is #\$ gotom identifier-state)
   (is #\@ nextm annotation-state)
   (is #\0 #'zero-state)
-  (digit-char-p nextm decnum-state)
+  (digit-char-p gotom decnum-state)
   (in +operators+ (curry #'operator-state (list ch)))
   (in +separators+ (separator-state ch))
   (is #\" nextm string-state)
