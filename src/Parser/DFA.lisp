@@ -195,20 +195,20 @@
   (digit-char-p gotom octnum-state)
   (T (make-number (list #\0) 10 32)))
 
-(defun emit-separator (str)
+(defun emit-separator (ch)
   (make-instance 'Token :value NIL :type
-    (case str
-      ("{" 'LBRACE)
-      ("}" 'RBRACE)
-      ("[" 'LBRACK)
-      ("]" 'RBRACK)
-      ("(" 'LPAREN)
-      (")" 'RPAREN)
-      ("," 'COMMA)
-      ("." 'DOT)
-      (";" 'SEMI)
-      (":" 'COLON)
-      ("?" 'QUESTION))))
+    (case ch
+      (#\{ 'LBRACE)
+      (#\} 'RBRACE)
+      (#\[ 'LBRACK)
+      (#\] 'RBRACK)
+      (#\( 'LPAREN)
+      (#\) 'RPAREN)
+      (#\, 'COMMA)
+      (#\. 'DOT)
+      (#\; 'SEMI)
+      (#\: 'COLON)
+      (#\? 'QUESTION))))
 
 (defun emit-oper (str)
   (make-instance
@@ -249,8 +249,7 @@
     ("|=" 'OREQ))))
 
 (defstate separator-state ch NIL
-  (is #\\ emit-with-d emit-separator) ;Suppress unused warning
-  (T emit-with-d emit-separator))
+  (T (lambda (_) _ (emit-separator ch))))
 
 (defstate line-comment-state ch str
   (is #\linefeed emit 'COMMENT)
