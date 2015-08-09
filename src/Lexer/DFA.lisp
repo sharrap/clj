@@ -123,7 +123,7 @@
 (defun emit-char (str)
   (make-instance 'Token :type 'CHAR :value (char-code (coerce str 'character))))
 
-(defun make-number (ls base ex)
+(defun make-number (base ex ls)
   (let* ((ex2 (expt 2 (- ex 1)))
          (str (concatenate 'string (reverse ls)))
          (ans (parse-integer str :radix base)))
@@ -200,32 +200,24 @@
   (alphanumericp record)
   (T emit 'ANNOTATION))
 
-(defmacro deflongnum-state (name base)
-  `(defstate ,name ch str
-     (T (progn ch (make-number str ,base 64)))))
+(defmacro defnum-state (name base oracle)
+  (let ((g (gensym)))
+    `(defstate ,name ch str
+       (,oracle record)
+       (is #\l emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
+       (is #\L emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
+       (T emit-with (lambda (,g) (make-number ,base 64 ,g))))))
 
-(deflongnum-state longdec-state 10)
-(deflongnum-state longoct-state 8)
-(deflongnum-state longhex-state 16)
-(deflongnum-state longbin-state 2)
-
-(defmacro defnum-state (name longname base oracle)
-  `(defstate ,name ch str
-     (,oracle record)
-     (is #\l nextm ,longname)
-     (is #\L nextm ,longname)
-     (T (make-number str ,base 32))))
-
-(defnum-state decnum-state longdec-state 10 digit-char-p)
-(defnum-state octnum-state longoct-state 8 oct-digit-p)
-(defnum-state hexnum-state longhex-state 16 hex-digit-p)
-(defnum-state binnum-state longbin-state 2 bin-digit-p)
+(defnum-state decnum-state 10 digit-char-p)
+(defnum-state octnum-state 8 oct-digit-p)
+(defnum-state hexnum-state 16 hex-digit-p)
+(defnum-state binnum-state 2 bin-digit-p)
 
 (defstate zero-state ch NIL
   (is #\x nextm hexnum-state)
   (is #\b nextm binnum-state)
   (digit-char-p gotom octnum-state)
-  (T (make-number (list #\0) 10 32)))
+  (T (make-number 10 32 (list #\0))))
 
 (defun emit-separator (ch)
   (make-instance 'Token :value NIL :type
