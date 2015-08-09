@@ -4,7 +4,7 @@
 (load "src/Lexer/Lexer.lisp")
 
 (defun start (stream)
-  (let ((ans (parse-next-token stream)))
+  (let ((ans (lex-next-token stream)))
     (if ans
         (progn (format T "Token Name: ~a, Value: ~a"
                            (token-type ans) (token-value ans))
