@@ -143,8 +143,7 @@
   (let ((n (if ls (parse-int-ls ls :radix base) 0)))
     (* (+ num
           (if (eql dec 0) 0
-              (let ((e (log dec 10)))
-                (/ dec (expt 10 (ceiling e))))))
+              (/ dec (expt base (ceiling (log dec base))))))
        (expt 10 n))))
 
 (defun parse-float (lst base)
