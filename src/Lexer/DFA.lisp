@@ -1,5 +1,5 @@
 (defconstant +operators+ "+-*/%^&|!~<>=")
-(defconstant +separators+ "{}()[],.;:?")
+(defconstant +separators+ "{}()[],;:?")
 (defconstant +eqopers+ '("+" "-" "*" "/" "&" "|" "^" "!" "=" "%"
                          ">>" "<<" ">>>" ">" "<"))
 (defconstant +whitespace+ " \n\r\t\v")
@@ -147,8 +147,9 @@
                 (/ dec (expt 10 (ceiling e))))))
        (expt 10 n))))
 
-(defun parse-float (ls base)
-  (let* ((p (split-when (curry #'eql #\.) ls))
+(defun parse-float (lst base)
+  (let* ((ls (if (equal (last lst) '(#\.)) (append lst '(#\0)) lst))
+         (p (split-when (curry #'eql #\.) ls))
          (head (car p))
          (tail (cdr p))
          (p2 (split-when (curry #'eql #\-) (if tail tail ls)))
@@ -325,6 +326,7 @@
   (is #\X nextm hexnum-state)
   (is #\b nextm binnum-state)
   (is #\B nextm binnum-state)
+  (is #\. (curry #'decfloatdot-state (list #\. #\0)))
   (digit-char-p gotom octnum-state)
   (T (make-int 10 32 "0")))
 
@@ -338,7 +340,6 @@
       (#\( 'LPAREN)
       (#\) 'RPAREN)
       (#\, 'COMMA)
-      (#\. 'DOT)
       (#\; 'SEMI)
       (#\: 'COLON)
       (#\? 'QUESTION))))
@@ -440,12 +441,17 @@
   (is #\\ #'escaped-char-state)
   (T (curry #'done-char-state (list ch))))
 
+(defstate dot-state ch NIL
+  (digit-char-p (curry #'decfloatdot-state (list ch #\. #\0)))
+  (T emit 'DOT))
+
 (defstate start-state ch NIL
   (alpha-char-p gotom identifier-state)
   (is #\$ gotom identifier-state)
   (is #\@ nextm annotation-state)
   (is #\0 #'zero-state)
   (digit-char-p gotom decnum-state)
+  (is #\. #'dot-state)
   (in +operators+ (curry #'operator-state (list ch)))
   (in +separators+ (separator-state ch))
   (is #\" nextm string-state)
