@@ -134,7 +134,7 @@
                    (- ans ext))))
     (if (or (>= ans ex2) (< ans (- ext)))
         NIL
-        (make-instance 'Token :type (if (eql ex 64) 'INTLIT 'DECLIT) :value ansn))))
+        (make-instance 'Token :type (if (eql ex 64) 'INTLIT 'LONGLIT) :value ansn))))
 
 (defun parse-int-ls (ls &key (radix 10))
   (parse-integer (concatenate 'string ls) :radix radix))
