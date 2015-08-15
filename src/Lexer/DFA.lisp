@@ -151,11 +151,12 @@
   (let* ((p (split-when (curry #'eql #\.) ls))
          (head (car p))
          (tail (cdr p))
-         (p2 (split-when (curry #'eql #\+) (if tail tail ls)))
-         (p3 (if p2 p2 (split-when (curry #'eql #\-) (if tail tail ls))))
-         (ht (car p3))
+         (p2 (split-when (curry #'eql #\-) (if tail tail ls)))
+         (p3 (if (cdr p2) p2 (split-when (curry #'eql #\+) (if tail tail ls))))
+         (p4 (if (cdr p3) p3 (list (if tail tail ls) #\0)))
+         (ht (car p4))
          (hn (if tail head ht)))
-    (parse-float-exp base (if p2 (cdr p2) (cons #\- (cdr p3)))
+    (parse-float-exp base (if (cdr p2) (cons #\- (cdr p2)) (cdr p4))
                      (if hn (parse-int-ls hn :radix base) 0)
                      (if (and tail ht) (parse-int-ls ht :radix base) 0))))
 
@@ -177,15 +178,15 @@
          `(make-instance 'Token :type ,(cadr arg)
              :value ,(if mem `(concatenate 'string (reverse ,mem)) NIL)))
         ((eql (car arg) 'emit-d)
-         (let ((_ (gensym)))
-           `(lambda (,_) ,_
+         (let ((g (gensym)))
+           `(lambda (,g) ,g
               (make-instance 'Token :type ,(cadr arg)
                  :value ,(if mem `(concatenate 'string (reverse ,mem)) 'NIL)))))
         ((eql (car arg) 'emit-with)
          `(,(cadr arg) (concatenate 'string (reverse ,mem))))
         ((eql (car arg) 'emit-with-d)
-         (let ((_ (gensym)))
-          `(lambda (,_) ,_
+         (let ((g (gensym)))
+          `(lambda (,g) ,g
               (,(cadr arg) (concatenate 'string (reverse ,mem))))))
         ((eql (car arg) 'gotom)
          `(,(cadr arg) ,mem ,ch))
@@ -210,7 +211,7 @@
           ((eql arg1 'in)
            `((findchr ,ch ,(cadr arg))
              ,(defstate-rhs name ch mem (cddr arg))))
-          ((or (consp arg1) (eql arg1 'T))
+          ((or (and (consp arg1) (not (eql (car arg1) 'lambda))) (eql arg1 'T))
            `(,(car arg) ,(defstate-rhs name ch mem (cdr arg))))
           (T `((,(car arg) ,ch)
            ,(defstate-rhs name ch mem (cdr arg)))))))
@@ -255,47 +256,68 @@
         (,oracle gotom ,main)
         (T NIL)))))
 
-(defmacro deffloatexp-state (name emit-test base)
-  (let ((main (gensym))
-        (g (gensym))
-        (under (gensym)))
+(defun ftest (ch)
+  (findchr ch "fFdD"))
+
+(defmacro deffloatexp-state (name base)
+  (let* ((main (gensym))
+         (g (gensym))
+         (under (gensym)))
    `(progn
       (declaim (ftype function ,main))
       (defstate ,under ch str
-        (digit-char-p record)
-        (is #\_ nextm ,main)
-        (T gotom ,main))
+        (is #\_ nextm ,under)
+        (digit-char-p gotom ,main)
+        (T NIL))
       (defstate ,main ch str
-        (digit-char-p gotom ,under)
-        (,emit-test emit-with-d (lambda (,g) (make-float ,base ch ,g)))
+        (digit-char-p record)
+        (is #\_ nextm ,under)
+        (ftest emit-with-d (lambda (,g) (make-float ,base ch ,g)))
         (T emit-with (lambda (,g) (make-float ,base NIL ,g))))
       (defstate ,name ch str
         (is #\+ (curry (function ,main) (cons #\+ str)))
         (is #\- (curry (function ,main) (cons #\- str)))
         (digit-char-p (curry (function ,main) (cons #\+ str)))
-        (,emit-test gotom ,main)
         (T NIL)))))
 
-(defun ftest (ch)
-  (findchr ch "fFdD"))
-(defun dtest (ch)
-  (findchr ch "lL"))
+(deffloatexp-state hexfloatexp-state 16)
+(deffloatexp-state decfloatexp-state 10)
 
-(deffloatexp-state hexfloatexp-state ftest 16)
-(deffloatexp-state decfloatexp-state dtest 10)
+(defmacro deffloatdot-state (name test expstate expteststr base)
+  (let* ((under (gensym))
+         (main (gensym))
+         (g (gensym)))
+   `(progn
+      (declaim (ftype function ,main))
+      (defstate ,under ch str
+        (is #\_ nextm ,under)
+        (,test gotom ,main)
+        (T NIL))
+      (defstate ,main ch str
+        (,test record)
+        (is #\_ nextm ,under)
+        ((findchr ch ,expteststr) nextm ,expstate)
+        (ftest emit-with-d (lambda (,g) (make-float ,base ch ,g)))
+        (T emit-with (lambda (,g) (make-float ,base NIL ,g))))
+      (defstate ,name ch str
+        (is #\_ NIL)
+        (T gotom ,main)))))
 
-(defstate hexfloatdot-state ch str
-  (hex-digit-p record)
-  (is #\p nextm hexfloatexp-state)
-  (is #\P nextm hexfloatexp-state)
-  (T (make-float 16 NIL (reverse str))))
+(deffloatdot-state hexfloatdot-state hex-digit-p hexfloatexp-state "pP" 16)
+(deffloatdot-state decfloatdot-state digit-char-p decfloatexp-state "eE" 10)
 
-(defnum-state decnum-state 10 digit-char-p NIL)
-(defnum-state octnum-state 8 oct-digit-p NIL)
+(defnum-state decnum-state 10 digit-char-p NIL
+  (is #\e nextm decfloatexp-state)
+  (is #\E nextm decfloatexp-state)
+  (is #\. (curry #'decfloatdot-state (cons #\. str)))
+  (ftest emit-with-d (lambda (_) (make-float 10 ch _))))
+
 (defnum-state hexnum-state 16 hex-digit-p
   (is #\p nextm hexfloatexp-state)
   (is #\P nextm hexfloatexp-state)
   (is #\. (curry #'hexfloatdot-state (cons #\. str))))
+
+(defnum-state octnum-state 8 oct-digit-p NIL)
 (defnum-state binnum-state 2 bin-digit-p NIL)
 
 (defstate zero-state ch NIL

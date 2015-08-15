@@ -34,5 +34,5 @@
                  (if (funcall e (car ls))
                      (cons (reverse acc) (cdr ls))
                      (split-when-int e (cdr ls) (cons (car ls) acc)))
-                 (cons e NIL))))
+                 (cons acc NIL))))
     (split-when-int pred lst NIL)))
