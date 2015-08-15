@@ -97,6 +97,9 @@
     ("||"   BOOLOR)
     ("|="   OREQ)))
 
+(defun findchr (ch str)
+  (find ch str :test #'eql))
+
 (defun bin-digit-p (ch)
   (or (eql ch #\0) (eql ch #\1)))
 
@@ -123,16 +126,46 @@
 (defun emit-char (str)
   (make-instance 'Token :type 'CHAR :value (char-code (coerce str 'character))))
 
-(defun make-number (base ex str)
+(defun make-int (base ex str)
   (let* ((ex2 (expt 2 (- ex 1)))
-         (ans (parse-integer str :radix base)))
-    (cond ((and (>= ans ex2) (<= ans (* 2 ex2)) (not (eql base 10)))
-           (make-instance 'Token :type 'NUMLIT :value (- ans (* 2 ex2))))
-          ((or (>= ans ex2) (< ans (- ex))) NIL)
-          (T (make-instance 'Token :type 'NUMLIT :value ans)))))
+         (ext (* ex2 2))
+         (ans (parse-integer str :radix base))
+         (ansn (if (and (>= ans ex2) (<= ans (* 2 ex2)) (not (eql base 10)))
+                   (- ans ext))))
+    (if (or (>= ans ex2) (< ans (- ext)))
+        NIL
+        (make-instance 'Token :type (if (eql ex 64) 'INTLIT 'DECLIT) :value ansn))))
 
-(defun findchr (ch str)
-  (find ch str :test #'eql))
+(defun parse-int-ls (ls &key (radix 10))
+  (parse-integer (concatenate 'string ls) :radix radix))
+
+(defun parse-float-exp (base ls num dec)
+  (let ((n (if ls (parse-int-ls ls :radix base) 0)))
+    (* (+ num
+          (if (eql dec 0) 0
+              (let ((e (log dec 10)))
+                (/ dec (expt 10 (ceiling e))))))
+       (expt 10 n))))
+
+(defun parse-float (ls base)
+  (let* ((p (split-when (curry #'eql #\.) ls))
+         (head (car p))
+         (tail (cdr p))
+         (p2 (split-when (curry #'eql #\+) (if tail tail ls)))
+         (p3 (if p2 p2 (split-when (curry #'eql #\-) (if tail tail ls))))
+         (ht (car p3))
+         (hn (if tail head ht)))
+    (parse-float-exp base (if p2 (cdr p2) (cons #\- (cdr p3)))
+                     (if hn (parse-int-ls hn :radix base) 0)
+                     (if (and tail ht) (parse-int-ls ht :radix base) 0))))
+
+(defun make-float (base ty str)
+  (let* ((ans (parse-float
+               (if (stringp str) (concatenate 'list str) str) base)))
+    (make-instance 'Token :type (if (or (eql ty #\f)
+                                        (eql ty #\F))
+                                    'FLOATLIT 'DOUBLELIT)
+                          :value ans)))
 
 (defun space-char-p (ch)
   (findchr ch +whitespace+))
@@ -184,7 +217,8 @@
 
 (defmacro defstate (name ch mem &rest args)
   `(defun ,name ,(if mem `(,mem ,ch) `(,ch))
-    (cond ,@(mapcar (curry #'defstate-args name ch mem) args))))
+    (cond ,@(mapcar (curry #'defstate-args name ch mem)
+                    (remove-if-not #'identity args)))))
 
 (defun emit-identifier (id)
   (let ((v (gethash id *keyword-hash*)))
@@ -199,7 +233,7 @@
   (alphanumericp record)
   (T emit 'ANNOTATION))
 
-(defmacro defnum-state (name base oracle)
+(defmacro defnum-state (name base oracle &rest other)
   (let ((g (gensym))
         (under (gensym))
         (main (gensym)))
@@ -207,28 +241,70 @@
       (declaim (ftype function ,under))
       (defstate ,main ch str
         (,oracle record)
-        (is #\l emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
-        (is #\L emit-with-d (lambda (,g) (make-number ,base 64 ,g)))
+        (is #\l emit-with-d (lambda (,g) (make-int ,base 64 ,g)))
+        (is #\L emit-with-d (lambda (,g) (make-int ,base 64 ,g)))
         (is #\_ nextm ,under)
-        (T emit-with (lambda (,g) (make-number ,base 64 ,g))))
+        ,@other
+        (T emit-with (lambda (,g) (make-int ,base 64 ,g))))
       (defstate ,name ch str
         (,oracle gotom ,main)
+        (is #\. gotom ,main)
         (T NIL))
       (defstate ,under ch str
         (is #\_ nextm ,under)
         (,oracle gotom ,main)
         (T NIL)))))
 
-(defnum-state decnum-state 10 digit-char-p)
-(defnum-state octnum-state 8 oct-digit-p)
-(defnum-state hexnum-state 16 hex-digit-p)
-(defnum-state binnum-state 2 bin-digit-p)
+(defmacro deffloatexp-state (name emit-test base)
+  (let ((main (gensym))
+        (g (gensym))
+        (under (gensym)))
+   `(progn
+      (declaim (ftype function ,main))
+      (defstate ,under ch str
+        (digit-char-p record)
+        (is #\_ nextm ,main)
+        (T gotom ,main))
+      (defstate ,main ch str
+        (digit-char-p gotom ,under)
+        (,emit-test emit-with-d (lambda (,g) (make-float ,base ch ,g)))
+        (T emit-with (lambda (,g) (make-float ,base NIL ,g))))
+      (defstate ,name ch str
+        (is #\+ (curry (function ,main) (cons #\+ str)))
+        (is #\- (curry (function ,main) (cons #\- str)))
+        (digit-char-p (curry (function ,main) (cons #\+ str)))
+        (,emit-test gotom ,main)
+        (T NIL)))))
+
+(defun ftest (ch)
+  (findchr ch "fFdD"))
+(defun dtest (ch)
+  (findchr ch "lL"))
+
+(deffloatexp-state hexfloatexp-state ftest 16)
+(deffloatexp-state decfloatexp-state dtest 10)
+
+(defstate hexfloatdot-state ch str
+  (hex-digit-p record)
+  (is #\p nextm hexfloatexp-state)
+  (is #\P nextm hexfloatexp-state)
+  (T (make-float 16 NIL (reverse str))))
+
+(defnum-state decnum-state 10 digit-char-p NIL)
+(defnum-state octnum-state 8 oct-digit-p NIL)
+(defnum-state hexnum-state 16 hex-digit-p
+  (is #\p nextm hexfloatexp-state)
+  (is #\P nextm hexfloatexp-state)
+  (is #\. (curry #'hexfloatdot-state (cons #\. str))))
+(defnum-state binnum-state 2 bin-digit-p NIL)
 
 (defstate zero-state ch NIL
   (is #\x nextm hexnum-state)
+  (is #\X nextm hexnum-state)
   (is #\b nextm binnum-state)
+  (is #\B nextm binnum-state)
   (digit-char-p gotom octnum-state)
-  (T (make-number 10 32 (list #\0))))
+  (T (make-int 10 32 "0")))
 
 (defun emit-separator (ch)
   (make-instance 'Token :value NIL :type

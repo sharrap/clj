@@ -26,3 +26,13 @@
       (progn (setf (gethash (caar ls) hash) (cadar ls))
              (hash-add-list hash (cdr ls)))
       NIL))
+
+
+(defun split-when (pred lst)
+  (labels ((split-when-int (e ls acc)
+             (if ls
+                 (if (funcall e (car ls))
+                     (cons (reverse acc) (cdr ls))
+                     (split-when-int e (cdr ls) (cons (car ls) acc)))
+                 (cons e NIL))))
+    (split-when-int pred lst NIL)))
