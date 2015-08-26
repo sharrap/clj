@@ -28,11 +28,34 @@
       NIL))
 
 
-(defun split-when (pred lst)
+(defun split-when-1 (pred lst &optional (save-split NIL))
   (labels ((split-when-int (e ls acc)
-             (if ls
-                 (if (funcall e (car ls))
-                     (cons (reverse acc) (cdr ls))
-                     (split-when-int e (cdr ls) (cons (car ls) acc)))
-                 (cons acc NIL))))
-    (split-when-int pred lst NIL)))
+             (cond ((not ls) (list (reverse acc)))
+                   ((not (funcall e (car ls)))
+                    (split-when-int e (cdr ls) (cons (car ls) acc)))
+                   (save-split (list (reverse acc) (list (car ls)) (cdr ls)))
+                   (T          (list (reverse acc) (cdr ls))))))
+    (if (stringp lst)
+        (mapcar (curry #'concatenate 'string)
+                (split-when-int pred (concatenate 'list lst) NIL))
+        (split-when-int pred lst NIL))))
+
+(defun split-when (pred lst &optional (save-split NIL))
+  (let ((ans (split-when-1 pred lst save-split)))
+    (cond ((not (cadr ans)) (list (car ans)))
+          (save-split
+           (list* (car ans) (cadr ans) (split-when pred (caddr ans) T)))
+          (T (cons (car ans) (split-when pred (cadr ans) NIL))))))
+
+(defun findchr (ch str)
+  (find ch str :test #'eql))
+
+;Compose two functions
+(defun compose2 (f1 f2)
+  (lambda (arg)
+    (funcall f1 (funcall f2 arg))))
+
+(defun compose (&rest fns)
+  (if fns
+      (reduce #'compose2 fns)
+      #'identity))

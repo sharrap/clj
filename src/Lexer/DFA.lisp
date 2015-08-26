@@ -97,9 +97,6 @@
     ("||"   BOOLOR)
     ("|="   OREQ)))
 
-(defun findchr (ch str)
-  (find ch str :test #'eql))
-
 (defun bin-digit-p (ch)
   (or (eql ch #\0) (eql ch #\1)))
 
@@ -148,12 +145,14 @@
 
 (defun parse-float (lst base)
   (let* ((ls (if (equal (last lst) '(#\.)) (append lst '(#\0)) lst))
-         (p (split-when (curry #'eql #\.) ls))
+         (p (split-when-1 (curry #'eql #\.) ls))
          (head (car p))
-         (tail (cdr p))
-         (p2 (split-when (curry #'eql #\-) (if tail tail ls)))
-         (p3 (if (cdr p2) p2 (split-when (curry #'eql #\+) (if tail tail ls))))
-         (p4 (if (cdr p3) p3 (list (if tail tail ls) #\0)))
+         (tail (cadr p))
+         (p2 (split-when-1 (curry #'eql #\-) (if tail tail ls)))
+         (p3 (if (cadr p2)
+                 p2
+                 (split-when-1 (curry #'eql #\+) (if tail tail ls))))
+         (p4 (if (cadr p3) p3 (list (if tail tail ls) #\0)))
          (ht (car p4))
          (hn (if tail head ht)))
     (parse-float-exp base (if (cdr p2) (cons #\- (cdr p2)) (cdr p4))
