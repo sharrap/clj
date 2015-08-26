@@ -37,12 +37,12 @@
 ;more meaningful (any, optional, repeat)
 (defun group-subexprs (frm)
   (labels ((closesym (sym)
-             (case sym
+             (ecase sym
                    ('< '>)
                    ('{ '})
                    ('[ '])))
            (identsym (sym)
-             (case sym
+             (ecase sym
                    ('> 'any)
                    ('] 'optional)
                    ('} 'repeat)))
