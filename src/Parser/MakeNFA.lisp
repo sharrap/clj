@@ -26,21 +26,15 @@
   (loop for form in forms do (check-validity forms))
   (setf (gethash name *rulehash*) forms))
 
-;This unbinds {}[] from surrounding letters
+;This unbinds {}[]<> from surrounding letters
 (defun comprehend-subexprs (form)
-  (labels ((split-brackets (x) (split-when (lambda (y) (findchr y "{}[]")) x T))
-           (flatten (l)
-             (apply #'append
-                    (mapcar (lambda (x)
-                              (if (listp x)
-                                  (cons '< (append (flatten x)
-                                                      (list '>)))
-                                  (list x))) l))))
+  (labels ((split-brackets (x)
+             (split-when (lambda (y) (findchr y "{}[]<>")) x T)))
     (mapcar #'intern
             (remove-if (lambda (x) (eql x ""))
                        (apply #'append
                               (mapcar (compose #'split-brackets #'string)
-                                      (flatten form)))))))
+                                      form))))))
 
 ;Group subexpressions from [], (), {} and rename them to something
 ;more meaningful (any, optional, repeat)
