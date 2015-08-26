@@ -1,4 +1,6 @@
 ;A nondeterministic parser based on LR(0).
+;Grammar is written in a LISP file and macroexpands into the appropriate
+;functions to generate the grammar
 
 ;Rule forms:
 ;(a b c)        Accept a b c
@@ -9,6 +11,7 @@
 
 (defparameter *rulehash* (make-hash-table))
 (defparameter *termhash* (make-hash-set))
+(defparameter *start-nonterminal* NIL)
 
 ;Register a new rule with name and a list of possible forms
 (defun register-rule (name forms)
@@ -67,5 +70,16 @@
                                            #'comprehend-subexprs)
                                   forms))))
 
+(defmacro defterminal (terminal)
+  `(set-add ,terminal *termhash*))
+
 (defmacro defterminals (&rest terminals)
-  `(progn ,(mapcar (lambda (x) `(set-add ,x *termhash*)) terminals)))
+  `(progn ,(mapcar (lambda (x) (defterminal x)) terminals)))
+
+(defun set-start-nonterminal (nonterminal)
+  (setf *start-nonterminal* nonterminal))
+
+;Generate the NFA now that all the grammar setup is done
+(defun generate-nfa ()
+  ;TODO
+  NIL)
