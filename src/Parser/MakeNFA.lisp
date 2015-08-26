@@ -80,6 +80,52 @@
   (setf *start-nonterminal* nonterminal))
 
 ;Generate the NFA now that all the grammar setup is done
+;Just use LR(0) for (relative) simplicity since it's nondeterministic anyways
+(defun compute-first-sets (nonterms prodhash)
+  (let ((firsthash (make-hash-table))
+        (nullablehash (make-hash-table))
+        (referredhash (make-hash-table))
+        (worklist nonterms))
+    (loop for nonterm in nonterms do
+     (progn
+       (setf (gethash nonterm firsthash) NIL)
+       (setf (gethash nonterm nullablehash) NIL)
+       (loop for prod in (gethash nonterm prodhash) do
+        (loop for term in prod do
+         (when (gethash term prodhash)
+               (setf (gethash term referredhash)
+                     (cons nonterm (gethash term referredhash))))))))
+    (loop while worklist do
+     (let* ((nonterm (car worklist))
+            (prods (gethash nonterm prodhash)))
+       (if (and (not (gethash nonterm nullablehash))
+                (some (lambda (x)
+                        (every (lambda (y) (gethash y nullablehash)) x))
+                      prods))
+           (progn
+             (setf (gethash nonterm nullablehash) T)
+             (setf worklist (append (gethash nonterm referredhash)
+                                    (cdr worklist))))
+           (setf worklist (cdr worklist)))))
+    (loop while worklist do
+     (let* ((nonterm (car worklist))
+            (prods (gethash nonterm prodhash)))
+       (labels ((get-first (prod)
+                  (cond ((not prod) NIL)
+                        ((not (gethash (car prod) prodhash)) (list (car prod)))
+                        ((not (gethash (car prod) nullablehash))
+                         (gethash (car prod) firsthash))
+                        (T (append (gethash (car prod) firsthash)
+                                   (get-first (cdr prod)))))))
+         (let ((firsts (apply #'append (mapcar #'get-first prods))))
+           (if (not (equal firsts (gethash nonterm firsthash)))
+               (progn
+                 (setf (gethash nonterm firsthash) firsts)
+                 (setf worklist (append (gethash nonterm referredhash)
+                                        (cdr worklist))))
+               (setf worklist (cdr worklist)))))))
+    firsthash))
+
 (defun generate-nfa ()
   ;TODO
   NIL)
