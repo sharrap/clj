@@ -2,6 +2,8 @@
 ;Grammar is written in a LISP file and macroexpands into the appropriate
 ;functions to generate the grammar
 
+(in-package :clj.parser.nfa)
+
 ;Rule forms:
 ;(a b c)        Accept a b c
 ;(a <b c> d)    Accept either a b d or a c d
@@ -88,7 +90,8 @@
   (let ((firsthash (make-hash-table))
         (nullablehash (make-hash-table))
         (referredhash (make-hash-table))
-        (worklist nonterms))
+        (worklist nonterms)
+        (worklist2 (copylst worklist)))
     (loop for nonterm in nonterms do
      (progn
        (setf (gethash nonterm firsthash) NIL)
@@ -112,8 +115,8 @@
                (setf worklist (append (gethash nonterm referredhash)
                                       (cdr worklist))))
              (setf worklist (cdr worklist)))))
-      (loop while worklist do
-       (let* ((nonterm (car worklist))
+      (loop while worklist2 do
+       (let* ((nonterm (car worklist2))
               (prods (gethash nonterm prodhash)))
          (labels ((get-first (prod)
                     (when prod
@@ -130,9 +133,9 @@
              (if (not (equal firsts (gethash nonterm firsthash)))
                  (progn
                    (setf (gethash nonterm firsthash) firsts)
-                   (setf worklist (append (gethash nonterm referredhash)
-                                          (cdr worklist))))
-                 (setf worklist (cdr worklist)))))))
+                   (setf worklist2 (append (gethash nonterm referredhash)
+                                          (cdr worklist2))))
+                 (setf worklist2 (cdr worklist2)))))))
       firsthash)))
 
 (defun generate-nfa ()

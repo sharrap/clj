@@ -1,3 +1,5 @@
+(in-package :clj.parser)
+
 (defclass action ()
   ((type :accessor action-type :initform NIL :initarg :type)
    (value :accessor action-value :initform NIL :initarg :value)))

@@ -1,5 +1,7 @@
 ;A simple implementation of a set. Just sits on top of hash tables.
 
+(in-package :clj.utils)
+
 (defmacro make-hash-set (&rest args)
   (if args
       `(make-hash-table ,args)

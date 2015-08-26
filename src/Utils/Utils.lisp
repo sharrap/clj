@@ -1,4 +1,4 @@
-(load "src/Utils/Set.lisp")
+(in-package :clj.utils)
 
 (defun curry (fn &rest args)
   (lambda (&rest args2)
@@ -61,3 +61,6 @@
   (if fns
       (reduce #'compose2 fns)
       #'identity))
+
+(defun copylst (ls)
+  (reduce #'cons ls :initial-value nil :from-end t))

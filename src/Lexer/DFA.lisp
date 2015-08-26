@@ -1,3 +1,5 @@
+(in-package :clj.lexer)
+
 (defconstant +operators+ "+-*/%^&|!~<>=")
 (defconstant +separators+ "{}()[],;:?")
 (defconstant +eqopers+ '("+" "-" "*" "/" "&" "|" "^" "!" "=" "%"

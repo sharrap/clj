@@ -1,3 +1,5 @@
+(in-package :clj.parser)
+
 (defun get-next-token (inp)
   (if (consp inp)
       (car inp)

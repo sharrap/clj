@@ -1,3 +1,5 @@
+(in-package :clj.lexer)
+
 (defun do-lex (state inp)
   (let ((ans (funcall state (istream-read inp))))
     (cond ((typep ans 'Token) ans)
