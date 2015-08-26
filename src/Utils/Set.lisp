@@ -7,11 +7,11 @@
       `(make-hash-table ,args)
       `(make-hash-table)))
 
-(defmacro set-contains (e set)
-  `(gethash ,e ,set))
+(defun set-contains (e set)
+  (gethash e set))
 
-(defmacro set-add (e set)
-  `(setf (gethash ,e ,set) T))
+(defun set-add (e set)
+  (setf (gethash e set) T))
 
-(defmacro set-remove (e set)
-  `(remhash ,e ,set))
+(defun set-remove (e set)
+  (remhash e set))

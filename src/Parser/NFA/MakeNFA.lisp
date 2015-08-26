@@ -15,18 +15,28 @@
 (defparameter *termhash* (make-hash-set))
 (defparameter *start-nonterminal* NIL)
 
+;for debugging/testing
+(defun print-hash (firsthash)
+  (format t "----------~%")
+  (with-hash-table-iterator (it firsthash)
+    (loop
+      (multiple-value-bind (entryp k v) (it)
+        (if entryp
+          (format t "Key: ~a Value: ~a~%" k v)
+          (return))))))
+
+
 (defun check-validity (form)
   (labels ((check-validity2 (f)
              (when (not f) (error "Cannot have empty subexpressions"))
-             (loop for item in f do
-               (when (listp item) (check-validity2 (cdr item))))))
-    (loop for item in form do
-      (when (listp item) (check-validity2 (cdr item))))))
+             (mapcar (compose #'check-validity2 #'cdr)
+                     (remove-if-not #'listp f))))
+    (mapcar #'check-validity2 (remove-if-not #'identity form))))
 
 ;Register a new rule with name and a list of possible forms
 (defun register-rule (name forms)
   (loop for form in forms do (check-validity forms))
-  (setf (gethash name *rulehash*) forms))
+  (setf (gethash name *rulehash*) (append forms (gethash name *rulehash*))))
 
 ;This unbinds {}[]<> from surrounding letters
 (defun comprehend-subexprs (form)
@@ -76,10 +86,11 @@
                                   forms))))
 
 (defmacro defterminal (terminal)
-  `(set-add ,terminal *termhash*))
+  `(set-add (quote ,terminal) *termhash*))
 
 (defmacro defterminals (&rest terminals)
-  `(progn ,(mapcar (lambda (x) (defterminal x)) terminals)))
+  `(progn
+     ,@(mapcar (lambda (x) `(defterminal ,x)) terminals)))
 
 (defun set-start-nonterminal (nonterminal)
   (setf *start-nonterminal* nonterminal))
@@ -129,15 +140,22 @@
                                   ((not (nullablep cp)) (gethash cp firsthash))
                                   (T (append (gethash cp firsthash)
                                              (get-first (cdr prod)))))))))
-           (let ((firsts (apply #'append (mapcar #'get-first prods))))
+           (let ((firsts (uniq (apply #'append (mapcar #'get-first prods)))))
              (if (not (equal firsts (gethash nonterm firsthash)))
                  (progn
                    (setf (gethash nonterm firsthash) firsts)
                    (setf worklist2 (append (gethash nonterm referredhash)
-                                          (cdr worklist2))))
+                                           (cdr worklist2))))
                  (setf worklist2 (cdr worklist2)))))))
       firsthash)))
 
 (defun generate-nfa ()
+  (let ((nonterms NIL))
+    (with-hash-table-iterator (it *rulehash*)
+      (loop
+        (multiple-value-bind (entryp k v) (it)
+          (if entryp
+              (setf nonterms (cons k nonterms))
+              (return)))))
   ;TODO
-  NIL)
+    (print-hash (compute-first-sets nonterms *rulehash*))))
