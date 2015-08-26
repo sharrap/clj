@@ -1,4 +1,4 @@
-(load "src/Utils.lisp")
+(load "src/Utils/Utils.lisp")
 (load "src/Lexer/Token.lisp")
 (load "src/Lexer/DFA.lisp")
 (load "src/Lexer/Lexer.lisp")

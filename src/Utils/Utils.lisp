@@ -1,3 +1,5 @@
+(load "src/Utils/Set.lisp")
+
 (defun curry (fn &rest args)
   (lambda (&rest args2)
     (apply fn (append args args2))))
