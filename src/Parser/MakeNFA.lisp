@@ -13,8 +13,17 @@
 (defparameter *termhash* (make-hash-set))
 (defparameter *start-nonterminal* NIL)
 
+(defun check-validity (form)
+  (labels ((check-validity2 (f)
+             (when (not f) (error "Cannot have empty subexpressions"))
+             (loop for item in f do
+               (when (listp item) (check-validity2 (cdr item))))))
+    (loop for item in form do
+      (when (listp item) (check-validity2 (cdr item))))))
+
 ;Register a new rule with name and a list of possible forms
 (defun register-rule (name forms)
+  (loop for form in forms do (check-validity forms))
   (setf (gethash name *rulehash*) forms))
 
 ;This unbinds {}[] from surrounding letters
@@ -95,36 +104,42 @@
          (when (gethash term prodhash)
                (setf (gethash term referredhash)
                      (cons nonterm (gethash term referredhash))))))))
-    (loop while worklist do
-     (let* ((nonterm (car worklist))
-            (prods (gethash nonterm prodhash)))
-       (if (and (not (gethash nonterm nullablehash))
-                (some (lambda (x)
-                        (every (lambda (y) (gethash y nullablehash)) x))
-                      prods))
-           (progn
-             (setf (gethash nonterm nullablehash) T)
-             (setf worklist (append (gethash nonterm referredhash)
-                                    (cdr worklist))))
-           (setf worklist (cdr worklist)))))
-    (loop while worklist do
-     (let* ((nonterm (car worklist))
-            (prods (gethash nonterm prodhash)))
-       (labels ((get-first (prod)
-                  (cond ((not prod) NIL)
-                        ((not (gethash (car prod) prodhash)) (list (car prod)))
-                        ((not (gethash (car prod) nullablehash))
-                         (gethash (car prod) firsthash))
-                        (T (append (gethash (car prod) firsthash)
-                                   (get-first (cdr prod)))))))
-         (let ((firsts (apply #'append (mapcar #'get-first prods))))
-           (if (not (equal firsts (gethash nonterm firsthash)))
-               (progn
-                 (setf (gethash nonterm firsthash) firsts)
-                 (setf worklist (append (gethash nonterm referredhash)
-                                        (cdr worklist))))
-               (setf worklist (cdr worklist)))))))
-    firsthash))
+    (labels ((nullablep (term)
+               (cond ((not (listp term)) (gethash term nullablehash))
+                     ((eql (car term) 'any) (some #'nullablep (cdr term)))
+                     (T T))))
+      (loop while worklist do
+       (let* ((nonterm (car worklist))
+              (prods (gethash nonterm prodhash)))
+         (if (and (not (gethash nonterm nullablehash))
+                  (some (lambda (x) (every #'nullablep x)) prods))
+             (progn
+               (setf (gethash nonterm nullablehash) T)
+               (setf worklist (append (gethash nonterm referredhash)
+                                      (cdr worklist))))
+             (setf worklist (cdr worklist)))))
+      (loop while worklist do
+       (let* ((nonterm (car worklist))
+              (prods (gethash nonterm prodhash)))
+         (labels ((get-first (prod)
+                    (when prod
+                          (let ((cp (car prod)))
+                            (cond ((and (listp cp) (nullablep cp))
+                                   (apply #'append (get-first (cdr prod))
+                                          (mapcar #'get-first (cdr cp))))
+                                  ((listp cp) (mapcar #'get-first (cdr cp))) 
+                                  ((not (gethash cp prodhash)) (list cp))
+                                  ((not (nullablep cp)) (gethash cp firsthash))
+                                  (T (append (gethash cp firsthash)
+                                             (get-first (cdr prod)))))))))
+           (let ((firsts (apply #'append (mapcar #'get-first prods))))
+             (if (not (equal firsts (gethash nonterm firsthash)))
+                 (progn
+                   (setf (gethash nonterm firsthash) firsts)
+                   (setf worklist (append (gethash nonterm referredhash)
+                                          (cdr worklist))))
+                 (setf worklist (cdr worklist)))))))
+      firsthash)))
 
 (defun generate-nfa ()
   ;TODO
