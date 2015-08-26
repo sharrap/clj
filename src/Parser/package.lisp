@@ -1,5 +1,5 @@
 (defpackage :clj.parser
-  (:use :cl :clj.utils))
+  (:use :cl :clj.utils :clj.lexer))
 
 (load "src/Parser/TreeNode.lisp")
 (load "src/Parser/LR1.lisp")

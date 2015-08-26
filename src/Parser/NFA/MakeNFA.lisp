@@ -87,11 +87,11 @@
 ;Generate the NFA now that all the grammar setup is done
 ;Just use LR(0) for (relative) simplicity since it's nondeterministic anyways
 (defun compute-first-sets (nonterms prodhash)
-  (let ((firsthash (make-hash-table))
-        (nullablehash (make-hash-table))
-        (referredhash (make-hash-table))
-        (worklist nonterms)
-        (worklist2 (copylst worklist)))
+  (let* ((firsthash (make-hash-table))
+         (nullablehash (make-hash-table))
+         (referredhash (make-hash-table))
+         (worklist nonterms)
+         (worklist2 (copylst worklist)))
     (loop for nonterm in nonterms do
      (progn
        (setf (gethash nonterm firsthash) NIL)
