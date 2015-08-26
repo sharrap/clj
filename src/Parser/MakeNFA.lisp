@@ -8,9 +8,13 @@
 ;These can be nested arbitrarily
 
 ;Register a new rule with name and a list of possible forms
-;Currently just prints (for debugging purposes)
 (defun register-rule (name forms)
   (format T "~a: ~a~%" name forms))
+
+;Using '|(| etc messes with vim's bracket matching and I can't
+;be bothered to fix it.
+(defconstant +lparensym+ (intern "("))
+(defconstant +rparensym+ (intern ")"))
 
 ;This unbinds {}[] from surrounding letters
 (defun comprehend-subexprs (form)
@@ -19,8 +23,8 @@
              (apply #'append
                     (mapcar (lambda (x)
                               (if (listp x)
-                                  (cons '|op| (append (flatten x)
-                                                      (list '|cl|)))
+                                  (cons +lparensym+ (append (flatten x)
+                                                      (list +rparensym+)))
                                   (list x))) l))))
     (mapcar #'intern
             (remove-if (lambda (x) (eql x ""))
@@ -33,12 +37,12 @@
 (defun group-subexprs (frm)
   (labels ((closesym (sym)
              (case sym
-                   ('|op| '|cl|)
+                   (+lparensym+ +rparensym+)
                    ('{ '})
                    ('[ '])))
            (identsym (sym)
              (case sym
-                   ('|cl| 'any)
+                   (+rparensym+ 'any)
                    ('] 'optional)
                    ('} 'repeat)))
            (group (form acc sym)
@@ -50,7 +54,7 @@
                     (list (cons (identsym sym)
                                 (reverse acc))
                           (cdr form)))
-                   ((or (eql (car form) '|op|)
+                   ((or (eql (car form) +lparensym+)
                         (eql (car form) '{)
                         (eql (car form) '[))
                     (let ((ans (group (cdr form) NIL (closesym (car form)))))
