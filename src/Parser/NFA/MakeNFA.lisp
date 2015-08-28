@@ -97,6 +97,8 @@
 
 ;Generate the NFA now that all the grammar setup is done
 ;Just use LR(0) for (relative) simplicity since it's nondeterministic anyways
+;(Unused) This was originally written by accident. It isn't necessary,
+;but is left around in the event that I suddenly want to start doing LR(1) or something
 (defun compute-first-sets (nonterms prodhash)
   (let* ((firsthash (make-hash-table))
          (nullablehash (make-hash-table))
@@ -105,8 +107,8 @@
          (worklist2 (copylst worklist)))
     (loop for nonterm in nonterms do
      (progn
-       (setf (gethash nonterm firsthash) NIL)
-       (setf (gethash nonterm nullablehash) NIL)
+       (setf (gethash nonterm firsthash) NIL
+             (gethash nonterm nullablehash) NIL)
        (loop for prod in (gethash nonterm prodhash) do
         (loop for term in prod do
          (when (gethash term prodhash)
@@ -121,10 +123,9 @@
               (prods (gethash nonterm prodhash)))
          (if (and (not (gethash nonterm nullablehash))
                   (some (lambda (x) (every #'nullablep x)) prods))
-             (progn
-               (setf (gethash nonterm nullablehash) T)
-               (setf worklist (append (gethash nonterm referredhash)
-                                      (cdr worklist))))
+             (setf (gethash nonterm nullablehash) T
+                   worklist (append (gethash nonterm referredhash)
+                                    (cdr worklist)))
              (setf worklist (cdr worklist)))))
       (loop while worklist2 do
        (let* ((nonterm (car worklist2))
@@ -142,10 +143,9 @@
                                              (get-first (cdr prod)))))))))
            (let ((firsts (uniq (apply #'append (mapcar #'get-first prods)))))
              (if (not (equal firsts (gethash nonterm firsthash)))
-                 (progn
-                   (setf (gethash nonterm firsthash) firsts)
-                   (setf worklist2 (append (gethash nonterm referredhash)
-                                           (cdr worklist2))))
+                 (setf (gethash nonterm firsthash) firsts
+                       worklist2 (append (gethash nonterm referredhash)
+                                         (cdr worklist)))
                  (setf worklist2 (cdr worklist2)))))))
       firsthash)))
 
@@ -229,8 +229,4 @@
           (if entryp
               (setf nonterms (cons k nonterms))
               (return)))))
-    ;TODO
-    (compute-nfa ;(compute-first-sets nonterms *rulehash*) 
-                 *rulehash* *start-nonterminal*)
-
-    (print-hash (compute-first-sets nonterms *rulehash*))))
+    (compute-nfa *rulehash* *start-nonterminal*)))
