@@ -1,17 +1,33 @@
-;A simple implementation of a set. Just sits on top of hash tables.
-
 (in-package :clj.utils)
 
-(defmacro make-hash-set (&rest args)
-  (if args
-      `(make-hash-table ,args)
-      `(make-hash-table)))
+(defclass class-set ()
+  ((internal-hash :accessor internal-hash
+                  :initform (make-hash-table :test #'eql)
+                  :initarg  :internal-hash)
+   (hashf         :accessor hashf
+                  :initform (lambda (x) x 0)
+                  :initarg  :hashf)
+   (eqf           :accessor eqf
+                  :initform (lambda (x y) x y t)
+                  :initarg  :eqf)))
 
-(defun set-contains (e set)
-  (gethash e set))
+(defun make-clsset (hash-fn eq-fn)
+  (make-instance 'class-hash :hashf hash-fn :eqf eq-fn))
 
-(defun set-add (e set)
-  (setf (gethash e set) T))
+(defun get-clsset (item hash)
+  (with-slots (internal-hash hashf eqf) hash
+    (let ((hashv (funcall hashf item)))
+      (find item (gethash hashv internal-hash) :test eqf))))
 
-(defun set-remove (e set)
-  (remhash e set))
+;Returns garbage.
+;setf to T to store the item in the set, setf to NIL to remove it.
+(defun (setf get-clsset) (val item hash)
+  (with-slots (internal-hash hashf eqf) hash
+    (let* ((hashv (funcall hashf item))
+           (ghashv (gethash hashv internal-hash)))
+      (cond ((find item v :test eqf)
+             (when (not val)
+                   (setf (gethash hashv internal-hash)
+                         (remove-if (lambda (x) (funcall eqf x item)) v))))
+            (val (setf (gethash hashv internal-hash) (cons item v)))
+            (T NIL)))))

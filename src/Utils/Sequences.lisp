@@ -17,14 +17,12 @@
 ;Generalized uniq which supports comparison of arbitrary types.
 ;Requires a hashing function and an equality test be provided
 (defun uniq-cls (hash-fn equal-fn &rest lsts)
-  (let ((hash (make-hash-table))
+  (let ((hash (make-clsset hash-fn equal-fn))
         (outls NIL))
     (loop for ls in lsts do
       (loop for item in ls do
-        (let ((hashc (funcall hash-fn item)))
-          (multiple-value-bind (v existsp) (gethash hashc hash)
-            (when (not (and existsp (find item v :test equal-fn)))
-              (progn
-                (setf (gethash hashc hash) (cons item v))
-                (setf outls (cons item outls))))))))
+        (when (not (get-clsset item hash))
+          (progn
+            (setf (get-clsset item hash) T)
+            (setf outls (cons item outls))))))
     outls))
