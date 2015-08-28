@@ -12,7 +12,7 @@
 ;These can be nested arbitrarily
 
 (defparameter *rulehash* (make-hash-table))
-(defparameter *termhash* (make-hash-set))
+(defparameter *termhash* (make-hash-table))
 (defparameter *start-nonterminal* NIL)
 
 ;for debugging/testing
@@ -53,14 +53,14 @@
 (defun group-subexprs (frm)
   (labels ((closesym (sym)
              (ecase sym
-                   ('< '>)
-                   ('{ '})
-                   ('[ '])))
+                   (< '>)
+                   ({ '})
+                   ([ '])))
            (identsym (sym)
              (ecase sym
-                   ('> 'any)
-                   ('] 'optional)
-                   ('} 'repeat)))
+                   (> 'any)
+                   (] 'optional)
+                   (} 'repeat)))
            (group (form acc sym)
              (cond ((not form)
                     (if (eql sym NIL)
@@ -86,14 +86,14 @@
                                   forms))))
 
 (defmacro defterminal (terminal)
-  `(set-add (quote ,terminal) *termhash*))
+  `(setf (gethash (quote ,terminal) *termhash*) T))
 
 (defmacro defterminals (&rest terminals)
   `(progn
      ,@(mapcar (lambda (x) `(defterminal ,x)) terminals)))
 
 (defun set-start-nonterminal (nonterminal)
-  (setf *start-nonterminal* nonterminal))
+  (setf *start-nonterminal* (intern (string nonterminal))))
 
 ;Generate the NFA now that all the grammar setup is done
 ;Just use LR(0) for (relative) simplicity since it's nondeterministic anyways
@@ -149,13 +149,89 @@
                  (setf worklist2 (cdr worklist2)))))))
       firsthash)))
 
+(defun get-new-items (startitems prodhash)
+  (remove-if-not #'identity
+    (apply #'append
+      (loop for item in startitems collect
+        (let* ((lhs (car (lritem-postdot item)))
+               (prods (gethash lhs prodhash)))
+          (when prods
+            (loop for prod in prods collect
+              (new-lritem lhs prod))))))))
+
+(defun make-lrstate (startitems prodhash)
+  (labels ((newstate (items state)
+             (let* ((news (get-new-items items prodhash))
+                    (state2 (uniq-cls #'lritem-hash #'lritem-equal
+                                      state news)))
+               (if (eql (length state2) (length state))
+                   state
+                   (newstate (get-new-items news prodhash) state2)))))
+    (new-lrstate (newstate startitems startitems))))
+
+(defun possible-transitions (state)
+  (uniq (remove-if-not #'identity
+          (loop for item in (lrstate-items state) collect
+            (car (lritem-postdot item))))))
+
+(defun follow-transition (state trans)
+  (labels ((move-dot (item)
+             (make-instance 'lritem :lhs (lritem-lhs item)
+                                    :dot (+ (lritem-dot item) 1)
+                                    :predot (append (lritem-predot item)
+                                                    (list (car (lritem-postdot item))))
+                                    :postdot (cdr (lritem-postdot item)))))
+    (mapcar #'move-dot
+      (remove-if-not (lambda (x) (eql (car (lritem-postdot x)) trans))
+        (lrstate-items state)))))
+
+(defun matching-state (states items)
+  (with-hash-table-iterator (it states)
+    (loop
+      (multiple-value-bind (existsp k v) (it)
+        (declare (ignore k))
+        (cond ((not existsp) (return))
+              ((lrstate-contains-items v items) (return v))
+              (T NIL))))))
+
+(defparameter *states* (make-hash-table))
+
+(defun compute-transitions (state prodhash)
+  (let ((transhash (lrstate-transhash state)))
+    (loop for trans in (possible-transitions state) do
+      (let* ((follow (follow-transition state trans))
+             (match (matching-state *states* follow))
+             (target (or match
+                         (make-lrstate follow prodhash))))
+        (setf (gethash trans transhash) target)
+        (when (not match)
+          (setf (gethash (lrstate-id target) *states*) target)
+          (compute-transitions target prodhash))))))
+
+(defun compute-nfa (prodhash start truestart)
+  (let* ((startitem (new-lritem start (list truestart 'EOF)))
+         (startstate (make-lrstate (list startitem) prodhash)))
+    (setf (gethash (lrstate-id startstate) *states*) startstate)
+    (compute-transitions startstate prodhash)
+    (with-hash-table-iterator (it *states*)
+      (loop
+        (multiple-value-bind (exitp k v) (it)
+          (when (not exitp) (return))
+          (print v))))))
+
+(defparameter *top-state* '|s'|)
+
 (defun generate-nfa ()
   (let ((nonterms NIL))
     (with-hash-table-iterator (it *rulehash*)
       (loop
         (multiple-value-bind (entryp k v) (it)
+          (declare (ignore v))
           (if entryp
               (setf nonterms (cons k nonterms))
               (return)))))
-  ;TODO
+    ;TODO
+    (compute-nfa ;(compute-first-sets nonterms *rulehash*) 
+                 *rulehash* *top-state* *start-nonterminal*)
+
     (print-hash (compute-first-sets nonterms *rulehash*))))
