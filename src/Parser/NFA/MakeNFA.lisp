@@ -44,7 +44,7 @@
              (split-when (lambda (y) (findchr y "{}[]<>")) x T)))
     (mapcar #'intern
             (remove-if (lambda (x) (eql x ""))
-                       (reduce #'append
+                       (reduce #'nconc
                               (mapcar (compose #'split-brackets #'string)
                                       form)
                               :from-end t)))))
@@ -135,14 +135,14 @@
                     (when prod
                           (let ((cp (car prod)))
                             (cond ((and (listp cp) (nullablep cp))
-                                   (reduce #'append (mapcar #'get-first (cdr cp))
+                                   (reduce #'nconc (mapcar #'get-first (cdr cp))
                                           :from-end t :initial-value (get-first (cdr prod))))
                                   ((listp cp) (mapcar #'get-first (cdr cp))) 
                                   ((not (gethash cp prodhash)) (list cp))
                                   ((not (nullablep cp)) (gethash cp firsthash))
                                   (T (append (gethash cp firsthash)
                                              (get-first (cdr prod)))))))))
-           (let ((firsts (uniq (reduce #'append (mapcar #'get-first prods) :from-end t))))
+           (let ((firsts (uniq (reduce #'nconc (mapcar #'get-first prods) :from-end t))))
              (if (not (equal firsts (gethash nonterm firsthash)))
                  (setf (gethash nonterm firsthash) firsts
                        worklist2 (append (gethash nonterm referredhash)
@@ -152,7 +152,7 @@
 
 (defun get-new-items (startitems prodhash)
   (remove-if-not #'identity
-    (reduce #'append
+    (reduce #'nconc
       (loop for item in startitems collect
         (let* ((lhs (car (lritem-postdot item)))
                (prods (gethash lhs prodhash)))
