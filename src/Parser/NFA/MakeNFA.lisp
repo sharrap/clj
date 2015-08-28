@@ -44,9 +44,10 @@
              (split-when (lambda (y) (findchr y "{}[]<>")) x T)))
     (mapcar #'intern
             (remove-if (lambda (x) (eql x ""))
-                       (apply #'append
+                       (reduce #'append
                               (mapcar (compose #'split-brackets #'string)
-                                      form))))))
+                                      form)
+                              :from-end t)))))
 
 ;Group subexpressions from [], (), {} and rename them to something
 ;more meaningful (any, optional, repeat)
@@ -134,14 +135,14 @@
                     (when prod
                           (let ((cp (car prod)))
                             (cond ((and (listp cp) (nullablep cp))
-                                   (apply #'append (get-first (cdr prod))
-                                          (mapcar #'get-first (cdr cp))))
+                                   (reduce #'append (mapcar #'get-first (cdr cp))
+                                          :from-end t :initial-value (get-first (cdr prod))))
                                   ((listp cp) (mapcar #'get-first (cdr cp))) 
                                   ((not (gethash cp prodhash)) (list cp))
                                   ((not (nullablep cp)) (gethash cp firsthash))
                                   (T (append (gethash cp firsthash)
                                              (get-first (cdr prod)))))))))
-           (let ((firsts (uniq (apply #'append (mapcar #'get-first prods)))))
+           (let ((firsts (uniq (reduce #'append (mapcar #'get-first prods) :from-end t))))
              (if (not (equal firsts (gethash nonterm firsthash)))
                  (setf (gethash nonterm firsthash) firsts
                        worklist2 (append (gethash nonterm referredhash)
@@ -151,13 +152,14 @@
 
 (defun get-new-items (startitems prodhash)
   (remove-if-not #'identity
-    (apply #'append
+    (reduce #'append
       (loop for item in startitems collect
         (let* ((lhs (car (lritem-postdot item)))
                (prods (gethash lhs prodhash)))
           (when prods
             (loop for prod in prods collect
-              (new-lritem lhs prod))))))))
+              (new-lritem lhs prod)))))
+      :from-end t)))
 
 (defun make-lrstate (startitems prodhash)
   (labels ((newstate (items state)
