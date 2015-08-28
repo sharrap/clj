@@ -208,9 +208,10 @@
           (setf (gethash (lrstate-id target) *states*) target)
           (compute-transitions target prodhash))))))
 
-(defun compute-nfa (prodhash start truestart)
-  (let* ((startitem (new-lritem start (list truestart 'EOF)))
-         (startstate (make-lrstate (list startitem) prodhash)))
+(defun compute-nfa (prodhash start)
+  (let* ((startitems (mapcar (lambda (x) (new-lritem start x))
+                             (gethash start prodhash)))
+         (startstate (make-lrstate startitems prodhash)))
     (setf (gethash (lrstate-id startstate) *states*) startstate)
     (compute-transitions startstate prodhash)
     (with-hash-table-iterator (it *states*)
@@ -218,8 +219,6 @@
         (multiple-value-bind (exitp k v) (it)
           (when (not exitp) (return))
           (print v))))))
-
-(defparameter *top-state* '|s'|)
 
 (defun generate-nfa ()
   (let ((nonterms NIL))
@@ -232,6 +231,6 @@
               (return)))))
     ;TODO
     (compute-nfa ;(compute-first-sets nonterms *rulehash*) 
-                 *rulehash* *top-state* *start-nonterminal*)
+                 *rulehash* *start-nonterminal*)
 
     (print-hash (compute-first-sets nonterms *rulehash*))))
