@@ -12,7 +12,7 @@
                   :initarg  :eqf)))
 
 (defun make-clsset (hash-fn eq-fn)
-  (make-instance 'class-hash :hashf hash-fn :eqf eq-fn))
+  (make-instance 'class-set :hashf hash-fn :eqf eq-fn))
 
 (defun get-clsset (item hash)
   (with-slots (internal-hash hashf eqf) hash
@@ -24,7 +24,7 @@
 (defun (setf get-clsset) (val item hash)
   (with-slots (internal-hash hashf eqf) hash
     (let* ((hashv (funcall hashf item))
-           (ghashv (gethash hashv internal-hash)))
+           (v (gethash hashv internal-hash)))
       (cond ((find item v :test eqf)
              (when (not val)
                    (setf (gethash hashv internal-hash)
