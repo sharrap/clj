@@ -120,7 +120,7 @@
 
 
 ;Syntax described above, similar to BNF but lisp-y
-(defmacro defrule (name &rest forms)
+(defmacro defrule (name &body forms)
   `(separate-exprs ,name
                    ,(mapcar (compose #'group-subexprs
                                      #'comprehend-subexprs)

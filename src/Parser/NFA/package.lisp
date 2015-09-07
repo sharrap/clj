@@ -4,3 +4,4 @@
 
 (load "src/Parser/NFA/LRClasses.lisp")
 (load "src/Parser/NFA/MakeNFA.lisp")
+(load "src/Parser/NFA/jgrammar.lisp")

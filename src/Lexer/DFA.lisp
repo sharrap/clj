@@ -9,95 +9,96 @@
 (defparameter *operator-hash* (make-hash-table :test #'equal))
 
 (hash-add-list *keyword-hash*
-  '(("abstract" ABSTRACT)
-    ("assert" ASSERT)
-    ("boolean" BOOLEAN)
-    ("break" BREAK)
-    ("byte" BYTE)
-    ("case" CASE)
-    ("catch" CATCH)
-    ("char" CHAR)
-    ("class" CLASS)
-    ("const" CONST)
-    ("continue" CONTINUE)
-    ("default" DEFAULT)
-    ("do" DO)
-    ("double" DOUBLE)
-    ("else" ELSE)
-    ("enum" ENUM)
-    ("extends" EXTENDS)
-    ("false" FALSE)
-    ("final" FINAL)
-    ("finally" FINALLY)
-    ("float" FLOAT)
-    ("for" FOR)
-    ("goto" GOTO)
-    ("if" IF)
-    ("implements" IMPLEMENTS)
-    ("import" IMPORT)
-    ("instanceof" INSTANCEOF)
-    ("int" INT)
-    ("interface" INTERFACE)
-    ("long" LONG)
-    ("native" NATIVE)
-    ("new" NEW)
-    ("null" NULL)
-    ("package" PACKAGE)
-    ("private" PRIVATE)
-    ("protected" PROTECTED)
-    ("public" PUBLIC)
-    ("return" RETURN)
-    ("short" SHORT)
-    ("static" STATIC)
-    ("strictfp" STRICTFP)
-    ("super" SUPER)
-    ("switch" SWITCH)
-    ("synchronized" SYNCHRONIZED)
-    ("this" THIS)
-    ("throw" THROW)
-    ("throws" THROWS)
-    ("transient" TRANSIENT)
-    ("true" TRUE)
-    ("try" TRY)
-    ("void" VOID)
-    ("volatile" VOLATILE)
-    ("while" WHILE)))
+  (mapcar (lambda (x) (list x (intern x)))
+          '("abstract"
+            "assert"
+            "boolean"
+            "break"
+            "byte"
+            "case"
+            "catch"
+            "char"
+            "class"
+            "const"
+            "continue"
+            "default"
+            "do"
+            "double"
+            "else"
+            "enum"
+            "extends"
+            "false"
+            "final"
+            "finally"
+            "float"
+            "for"
+            "goto"
+            "if"
+            "implements"
+            "import"
+            "instanceof"
+            "int"
+            "interface"
+            "long"
+            "native"
+            "new"
+            "null"
+            "package"
+            "private"
+            "protected"
+            "public"
+            "return"
+            "short"
+            "static"
+            "strictfp"
+            "super"
+            "switch"
+            "synchronized"
+            "this"
+            "throw"
+            "throws"
+            "transient"
+            "true"
+            "try"
+            "void"
+            "volatile"
+            "while")))
 
 (hash-add-list *operator-hash*
-  '(("<"    LT)
-    ("<="   LEQ)
-    (">"    GT)
-    (">="   GEQ)
-    ("<<"   LSHIFT)
-    ("<<="  LSHIFTEQ)
-    (">>"   RSHIFT)
-    (">>="  RSHIFTEQ)
-    (">>>"  URSHIFT)
-    (">>>=" URSHIFTEQ)
-    ("++"   INCR)
-    ("--"   DECR)
-    ("+"    PLUS)
-    ("+="   PLUSEQ)
-    ("-"    MINUS)
-    ("-="   MINUSEQ)
-    ("*"    TIMES)
-    ("*="   TIMESEQ)
-    ("/"    DIV)
-    ("/="   DIVEQ)
-    ("%"    MOD)
-    ("%="   MODEQ)
-    ("="    ASSIGN)
-    ("=="   EQ)
-    ("!"    NOT)
-    ("!="   NOTEQ)
-    ("&"    AND)
-    ("&&"   BOOLAND)
-    ("&="   ANDEQ)
-    ("^"    XOR)
-    ("^="   XOREQ)
-    ("|"    OR)
-    ("||"   BOOLOR)
-    ("|="   OREQ)))
+  '(("<"    |lt|)
+    ("<="   |leq|)
+    (">"    |gt|)
+    (">="   |geq|)
+    ("<<"   |lshift|)
+    ("<<="  |lshifteq|)
+    (">>"   |rshift|)
+    (">>="  |rshifteq|)
+    (">>>"  |urshift|)
+    (">>>=" |urshifteq|)
+    ("++"   |incr|)
+    ("--"   |decr|)
+    ("+"    |plus|)
+    ("+="   |pluseq|)
+    ("-"    |minus|)
+    ("-="   |minuseq|)
+    ("*"    |times|)
+    ("*="   |timeseq|)
+    ("/"    |div|)
+    ("/="   |diveq|)
+    ("%"    |mod|)
+    ("%="   |modeq|)
+    ("="    |assign|)
+    ("=="   |eq|)
+    ("!"    |not|)
+    ("!="   |noteq|)
+    ("&"    |and|)
+    ("&&"   |booland|)
+    ("&="   |andeq|)
+    ("^"    |xor|)
+    ("^="   |xoreq|)
+    ("|"    |or|)
+    ("||"   |boolor|)
+    ("|="   |oreq|)))
 
 (defun bin-digit-p (ch)
   (or (eql ch #\0) (eql ch #\1)))
@@ -114,16 +115,16 @@
   (let ((ans (parse-integer str :radix 8)))
     (if (> ans 255)
         NIL
-        (make-instance 'Token :type 'CHAR :value ans))))
+        (make-instance 'Token :type '|char| :value ans))))
 
 (defun emit-unicode (str)
   (let ((ans (parse-integer str :radix 16)))
     (if (> ans #xffff)
         NIL
-        (make-instance 'Token :type 'CHAR :value ans))))
+        (make-instance 'Token :type '|char| :value ans))))
 
 (defun emit-char (str)
-  (make-instance 'Token :type 'CHAR :value (char-code (coerce str 'character))))
+  (make-instance 'Token :type 'CHAR :value (char-code (char str 0))))
 
 (defun make-int (base ex str)
   (let* ((ex2 (expt 2 (- ex 1)))
@@ -133,7 +134,8 @@
                    (- ans ext))))
     (if (or (>= ans ex2) (< ans (- ext)))
         NIL
-        (make-instance 'Token :type (if (eql ex 64) 'INTLIT 'LONGLIT) :value ansn))))
+        (make-instance 'Token :type (if (eql ex 64) '|intlit| '|longlit|)
+                              :value ansn))))
 
 (defun parse-int-ls (ls &key (radix 10))
   (parse-integer (concatenate 'string ls) :radix radix))
@@ -166,7 +168,7 @@
                (if (stringp str) (concatenate 'list str) str) base)))
     (make-instance 'Token :type (if (or (eql ty #\f)
                                         (eql ty #\F))
-                                    'FLOATLIT 'DOUBLELIT)
+                                    '|floatlit| '|doublelit|)
                           :value ans)))
 
 (defun space-char-p (ch)
@@ -225,15 +227,11 @@
 (defun emit-identifier (id)
   (let ((v (gethash id *keyword-hash*)))
     (if v (make-instance 'Token :type v :value NIL)
-          (make-instance 'Token :type 'IDENTIFIER :value id))))
+          (make-instance 'Token :type '|identifier| :value id))))
 
 (defstate identifier-state ch str
   (alphanumericp record)
   (T emit-with emit-identifier))
-
-(defstate annotation-state ch str
-  (alphanumericp record)
-  (T emit 'ANNOTATION))
 
 (defmacro defnum-state (name base oracle &rest other)
   (let ((g (gensym))
@@ -333,16 +331,16 @@
 (defun emit-separator (ch)
   (make-instance 'Token :value NIL :type
     (case ch
-      (#\{ 'LBRACE)
-      (#\} 'RBRACE)
-      (#\[ 'LBRACK)
-      (#\] 'RBRACK)
-      (#\( 'LPAREN)
-      (#\) 'RPAREN)
-      (#\, 'COMMA)
-      (#\; 'SEMI)
-      (#\: 'COLON)
-      (#\? 'QUESTION))))
+      (#\{ '|lbrace|)
+      (#\} '|rbrace|)
+      (#\[ '|lbrack|)
+      (#\] '|rbrack|)
+      (#\( '|lparen|)
+      (#\) '|rparen|)
+      (#\, '|comma|)
+      (#\; '|semi|)
+      (#\: '|colon|)
+      (#\? '|question|))))
 
 (defun emit-oper (str)
   (make-instance 'token :type (gethash str *operator-hash*) :value NIL))
@@ -351,8 +349,8 @@
   (T (lambda (_) _ (emit-separator ch))))
 
 (defstate line-comment-state ch str
-  (is #\linefeed emit 'COMMENT)
-  (is #\return emit 'COMMENT)
+  (is #\linefeed emit '|comment|)
+  (is #\return emit '|comment|)
   (T record))
 
 (declaim (ftype function block-comment-end-state))
@@ -362,7 +360,7 @@
   (T record))
 
 (defstate block-comment-end-state ch str
-  (is #\/ emit-d 'COMMENT)
+  (is #\/ emit-d '|comment|)
   (T (block-comment-state (cons #\* str) ch)))
 
 (defstate operator-state ch str
@@ -397,8 +395,8 @@
   (T NIL))
 
 (defstate emit-string-state ch str
-  (is #\# emit 'STRING) ;Suppress unused warnings
-  (T emit 'STRING))
+  (is #\# emit '|string|) ;Suppress unused warnings
+  (T emit '|string|))
 
 (defstate string-state ch str
   (is #\" nextm emit-string-state)
@@ -443,12 +441,12 @@
 
 (defstate dot-state ch NIL
   (digit-char-p (curry #'decfloatdot-state (list ch #\. #\0)))
-  (T emit 'DOT))
+  (T emit '|dot|))
 
 (defstate start-state ch NIL
   (alpha-char-p gotom identifier-state)
   (is #\$ gotom identifier-state)
-  (is #\@ nextm annotation-state)
+  (is #\@ emit-d '|at|)
   (is #\0 #'zero-state)
   (digit-char-p gotom decnum-state)
   (is #\. #'dot-state)
