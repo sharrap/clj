@@ -4,10 +4,10 @@
 (load "src/Parser/NFA/package.lisp")
 
 (defun start (stream)
-  (let ((ans (lex-next-token stream)))
+  (let ((ans (clj.lexer:lex-next-token stream)))
     (if ans
         (progn (format T "Token Name: ~a, Value: ~a"
-                           (token-type ans) (token-value ans))
+                           (clj.lexer:token-type ans) (clj.lexer:token-value ans))
                (start stream))
         NIL)))
 

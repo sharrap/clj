@@ -43,7 +43,7 @@
   (labels ((split-brackets (x)
              (split-when (lambda (y) (findchr y "{}[]<>")) x T)))
     (mapcar #'intern
-            (remove-if (lambda (x) (eql x ""))
+            (remove-if (lambda (x) (equal x ""))
                        (reduce #'nconc
                               (mapcar (compose #'split-brackets #'string)
                                       form)
@@ -79,12 +79,52 @@
                    (T (group (cdr form) (cons (car form) acc) sym)))))
     (group frm NIL NIL)))
 
+(defmacro make-symgen (name symprefix)
+  (let ((x (gensym)))
+   `(defun ,name ()
+     (let ((,x 0))
+      (prog1
+       (make-symbol (concatenate 'string ,(symbol-name symprefix) (write-to-string ,x)))
+       (incf ,x 1))))))
+
+(make-symgen genrepeatsym repeat)
+(make-symgen genoptionalsym optional)
+(make-symgen genanysym any)
+
+;Make new symbols & rules for subexpressions
+(defmacro separate-exprs (rulename forms)
+  (let* ((newrules NIL)
+         (newforms
+           (loop for form in forms collect
+             (loop for item in form collect
+               (cond ((not (listp item)) item)
+                     ((eql (car item) 'any)
+                      (let ((sym (genanysym)))
+                       (setf newrules
+                         (cons `(defrule ,sym ,@(mapcar (lambda (x) (list x)) (cdr item))) newrules))
+                       sym))
+                     ((eql (car item) 'optional)
+                      (let ((sym (genoptionalsym)))
+                       (setf newrules
+                         (cons `(defrule ,sym ,(cdr item) ()) newrules))
+                       sym))
+                     ((eql (car item) 'repeat)
+                      (let ((sym (genrepeatsym)))
+                       (setf newrules
+                         (cons `(defrule ,sym (,(cdr item) ,sym) ()) newrules))
+                       sym))
+                     (t (error (concatenate 'string "Unrecognized: " (symbol-name (car item))))))))))
+   `(progn
+      ,@newrules
+      (register-rule (quote ,rulename) (quote ,newforms)))))
+
+
 ;Syntax described above, similar to BNF but lisp-y
 (defmacro defrule (name &rest forms)
-  `(register-rule (quote ,name)
-                  (quote ,(mapcar (compose #'group-subexprs
-                                           #'comprehend-subexprs)
-                                  forms))))
+  `(separate-exprs ,name
+                   ,(mapcar (compose #'group-subexprs
+                                     #'comprehend-subexprs)
+                            forms)))
 
 (defmacro defterminal (terminal)
   `(setf (gethash (quote ,terminal) *termhash*) T))
@@ -219,6 +259,7 @@
     (with-hash-table-iterator (it *states*)
       (loop
         (multiple-value-bind (exitp k v) (it)
+          (declare (ignore k))
           (when (not exitp) (return))
           (print v))))))
 

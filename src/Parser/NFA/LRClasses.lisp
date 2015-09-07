@@ -22,7 +22,8 @@
    (items     :accessor lrstate-items :initform NIL :initarg :items)
    (itemset   :accessor lrstate-itemset :initform NIL :initarg :itemset)
    (transhash :accessor lrstate-transhash :initform (make-hash-table)
-              :initarg :transhash)))
+              :initarg :transhash)
+   (reductions :accessor lrstate-reductions :initform NIL :initarg :reductions)))
 
 (defmethod print-object ((obj lrstate) stream)
   (print-unreadable-object (obj stream :type t :identity nil)
@@ -59,7 +60,9 @@
 
 (defun new-lrstate (items)
   (make-instance 'lrstate :items items
-                          :itemset (clsset-from-items items)))
+                          :itemset (clsset-from-items items)
+                          :reductions (remove-if-not
+                                       (lambda (x) (lritem-postdot x)) items)))
 
 (defun new-lritem (lhs prod)
   (make-instance 'lritem :lhs lhs :postdot prod))
