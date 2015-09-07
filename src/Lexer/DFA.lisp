@@ -441,7 +441,12 @@
 
 (defstate dot-state ch NIL
   (digit-char-p (curry #'decfloatdot-state (list ch #\. #\0)))
+  (is #\. nextm twodot-state)
   (T emit '|dot|))
+
+(defstate twodot-state ch NIL
+  (is #\. emit-d '|threedots|)
+  (T NIL))
 
 (defstate start-state ch NIL
   (alpha-char-p gotom identifier-state)
