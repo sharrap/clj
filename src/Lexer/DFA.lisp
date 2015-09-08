@@ -98,7 +98,8 @@
     ("^="   |xoreq|)
     ("|"    |or|)
     ("||"   |boolor|)
-    ("|="   |oreq|)))
+    ("|="   |oreq|)
+    ("->"   |rarrow|)))
 
 (defun bin-digit-p (ch)
   (or (eql ch #\0) (eql ch #\1)))
@@ -372,6 +373,7 @@
   (ismem #\> ">>" record)
   (ismem #\+ "+" record)
   (ismem #\- "-" record)
+  (ismem #\> "-" record)
   (isf #\= (lambda (s) (find s +eqopers+ :test #'equal)) record)
   (ismem #\/ "/" (curry #'line-comment-state NIL))
   (ismem #\* "/" (curry #'block-comment-state NIL))
