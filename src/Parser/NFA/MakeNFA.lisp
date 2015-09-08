@@ -263,6 +263,24 @@
           (when (not exitp) (return))
           (print v))))))
 
+(defun check-correctness (nonterms terms prods)
+  (loop for nonterm in nonterms do
+    (let ((prods (gethash nonterm prods)))
+      (loop for prod in prods do
+        (loop for sym in prod do
+          (multiple-value-bind (v existsp) (gethash sym prods)
+            (declare (ignore v))
+            (multiple-value-bind (v existsp2) (gethash sym terms)
+              (declare (ignore v))
+              (when (not (or existsp existsp2))
+                (error (concatenate 'string "Unrecognized symbol "
+                                    (symbol-name sym)
+                                    " in rule "
+                                    (prin1-to-string prod)
+                                    " with LHS "
+                                    (symbol-name nonterm)
+                                    "."))))))))))
+
 (defun generate-nfa ()
   (let ((nonterms NIL))
     (with-hash-table-iterator (it *rulehash*)
@@ -272,4 +290,5 @@
           (if entryp
               (setf nonterms (cons k nonterms))
               (return)))))
+    (check-correctness nonterms *termhash* *rulehash*)
     (compute-nfa *rulehash* *start-nonterminal*)))
