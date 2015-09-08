@@ -396,8 +396,8 @@
   (T NIL))
 
 (defstate emit-string-state ch str
-  (is #\# emit '|string|) ;Suppress unused warnings
-  (T emit '|string|))
+  (is #\# emit '|strlit|) ;Suppress unused warnings
+  (T emit '|strlit|))
 
 (defstate string-state ch str
   (is #\" nextm emit-string-state)
