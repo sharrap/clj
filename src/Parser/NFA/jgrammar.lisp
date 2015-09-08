@@ -176,6 +176,9 @@
 (defrule TypeParameters
   (|lt| TypeParameterList |gt|))
 
+(defrule TypeParameterList
+  (TypeParameter {|comma| TypeParameter}))
+
 (defrule Superclass
   (|extends| ClassType))
 
@@ -387,7 +390,7 @@
   (|static|)
   (|strictfp|))
 
-(defrule ExtendsInterface
+(defrule ExtendsInterfaces
   (|extends| InterfaceTypeList))
 
 (defrule InterfaceBody
@@ -408,6 +411,9 @@
   (|public|)
   (|static|)
   (|final|))
+
+(defrule InterfaceMethodDeclaration
+  ({InterfaceMethodModifier} MethodHeader MethodBody))
 
 (defrule InterfaceMethodModifier
   (Annotation)
@@ -728,13 +734,13 @@
   (Expression {|comma| Expression}))
 
 (defrule MethodReference
-  (ExpressionName |twocolon| [TypeArguments] |identifier|)
-  (ReferenceType |twocolon| [TypeArguments] |identifier|)
-  (Primary |twocolon| [TypeArguments] |identifier|)
-  (|super| |twocolon| [TypeArguments] |identifier|)
-  (TypeName |dot| |super| |twocolon| [TypeArguments] |identifier|)
-  (ClassType |twocolon| [TypeArguments] |new|)
-  (ArrayType |twocolon| |new|))
+  (ExpressionName |twocolons| [TypeArguments] |identifier|)
+  (ReferenceType |twocolons| [TypeArguments] |identifier|)
+  (Primary |twocolons| [TypeArguments] |identifier|)
+  (|super| |twocolons| [TypeArguments] |identifier|)
+  (TypeName |dot| |super| |twocolons| [TypeArguments] |identifier|)
+  (ClassType |twocolons| [TypeArguments] |new|)
+  (ArrayType |twocolons| |new|))
 
 (defrule ArrayCreationExpression
   (|new| PrimitiveType DimExprs [Dims])
@@ -758,7 +764,10 @@
 (defrule LambdaParameters
   (|identifier|)
   (|lparen| [FormalParameterList] |rparen|)
-  (|lparen| InferredParameterList |rparen|))
+  (|lparen| InferredFormalParameterList |rparen|))
+
+(defrule InferredFormalParameterList
+  (|identifier| {|comma| |identifier|}))
 
 (defrule LambdaBody
   (Expression)
@@ -874,7 +883,7 @@
   (PostfixExpression |incr|))
 
 (defrule PostDecrementExpression
-  (PostfixExpresion |decr|))
+  (PostfixExpression |decr|))
 
 (defrule CastExpression
   (|lparen| PrimitiveType |rparen| UnaryExpression)
@@ -958,3 +967,5 @@
               |floatlit|
               |doublelit|
               |comment|)
+
+(set-start-nonterminal 'CompilationUnit)
