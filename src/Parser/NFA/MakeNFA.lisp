@@ -210,7 +210,7 @@
                                       state news)))
                (if (eql (length state2) (length state))
                    state
-                   (newstate (get-new-items news prodhash) state2)))))
+                   (newstate news state2)))))
     (new-lrstate (newstate startitems startitems))))
 
 (defun possible-transitions (state)
