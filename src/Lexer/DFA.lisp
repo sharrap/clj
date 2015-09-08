@@ -86,7 +86,7 @@
     ("/"    |div|)
     ("/="   |divassign|)
     ("%"    |mod|)
-    ("%="   |modeq|)
+    ("%="   |modassign|)
     ("="    |assign|)
     ("=="   |eq|)
     ("!"    |not|)
