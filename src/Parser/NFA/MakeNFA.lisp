@@ -82,11 +82,11 @@
 
 (defmacro make-symgen (name symprefix)
   (let ((x (gensym)))
-   `(defun ,name ()
-     (let ((,x 0))
-      (prog1
-       (make-symbol (concatenate 'string ,(symbol-name symprefix) (write-to-string ,x)))
-       (incf ,x 1))))))
+   `(let ((,x 0))
+      (defun ,name ()
+        (prog1
+          (make-symbol (concatenate 'string ,(symbol-name symprefix) (write-to-string ,x)))
+          (incf ,x 1))))))
 
 (make-symgen genrepeatsym repeat)
 (make-symgen genoptionalsym optional)
