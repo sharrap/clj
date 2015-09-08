@@ -115,6 +115,7 @@
                          (cons `(separate-exprs ,sym ((,@(cdr item) ,sym) ())) newrules))
                        sym))
                      (t (error (concatenate 'string "Unrecognized: " (symbol-name (car item))))))))))
+    (format t "Registering new rule... ~a --> ~a~%" rulename newforms)
    `(progn
       ,@newrules
       (register-rule (quote ,rulename) (quote ,newforms)))))
