@@ -884,3 +884,77 @@
 
 (defrule ConstantExpression
   (Expression))
+
+(defterminals ;Keywords
+              |abstract| |assert| |boolean| |break| |byte| |case|
+              |catch| |char| |class| |const| |continue| |default|
+              |do| |double| |else| |enum| |extends| |false| |final|
+              |finally| |float| |for| |goto| |if| |implements| |import|
+              |instanceof| |int| |interface| |long| |native| |new|
+              |null| |package| |private| |protected| |public| |return|
+              |short| |static| |strictfp| |super| |switch| |synchronized|
+              |this| |throw| |throws| |transient| |true| |try| |void|
+              |volatile| |while|
+
+              ;Operators
+              |lt|
+              |leq|
+              |gt|
+              |geq|
+              |lshift|
+              |lshiftassign|
+              |rshift|
+              |rshiftassign|
+              |urshift|
+              |urshiftassign|
+              |incr|
+              |decr|
+              |plus|
+              |plusassign|
+              |minus|
+              |minusassign|
+              |times|
+              |timesassign|
+              |div|
+              |divassign|
+              |mod|
+              |modassign|
+              |assign|
+              |eq|
+              |not|
+              |noteq|
+              |and|
+              |booland|
+              |andassign|
+              |xor|
+              |xorassign|
+              |or|
+              |boolor|
+              |orassign|
+              |rarrow|
+
+              ;Other symbols
+              |dot|
+              |threedots|
+              |colon|
+              |twocolons|
+              |lbrace|
+              |rbrace|
+              |lbrack|
+              |rbrack|
+              |lparen|
+              |rparen|
+              |comma|
+              |semi|
+              |at|
+              |question|
+
+              ;Other
+              |identifier|
+              |charlit|
+              |strlit|
+              |intlit|
+              |longlit|
+              |floatlit|
+              |doublelit|
+              |comment|)

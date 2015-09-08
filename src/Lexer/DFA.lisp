@@ -1,7 +1,7 @@
 (in-package :clj.lexer)
 
 (defconstant +operators+ "+-*/%^&|!~<>=")
-(defconstant +separators+ "{}()[],;?")
+(defconstant +separators+ "{}()[],;?@")
 (defconstant +eqopers+ '("+" "-" "*" "/" "&" "|" "^" "!" "=" "%"
                          ">>" "<<" ">>>" ">" "<"))
 (defconstant +whitespace+ " \n\r\t\v")
@@ -116,16 +116,16 @@
   (let ((ans (parse-integer str :radix 8)))
     (if (> ans 255)
         NIL
-        (make-instance 'Token :type '|char| :value ans))))
+        (make-instance 'Token :type '|charlit| :value ans))))
 
 (defun emit-unicode (str)
   (let ((ans (parse-integer str :radix 16)))
     (if (> ans #xffff)
         NIL
-        (make-instance 'Token :type '|char| :value ans))))
+        (make-instance 'Token :type '|charlit| :value ans))))
 
 (defun emit-char (str)
-  (make-instance 'Token :type 'CHAR :value (char-code (char str 0))))
+  (make-instance 'Token :type '|charlit| :value (char-code (char str 0))))
 
 (defun make-int (base ex str)
   (let* ((ex2 (expt 2 (- ex 1)))
@@ -340,6 +340,7 @@
       (#\) '|rparen|)
       (#\, '|comma|)
       (#\; '|semi|)
+      (#\@ '|at|)
       (#\? '|question|))))
 
 (defun emit-oper (str)
@@ -450,13 +451,12 @@
   (T emit '|dot|))
 
 (defstate colon-state ch NIL
-  (is #\: emit-d '|twocolon|)
+  (is #\: emit-d '|twocolons|)
   (T emit-d '|colon|))
 
 (defstate start-state ch NIL
   (alpha-char-p gotom identifier-state)
   (is #\$ gotom identifier-state)
-  (is #\@ emit-d '|at|)
   (is #\0 #'zero-state)
   (digit-char-p gotom decnum-state)
   (is #\. #'dot-state)
