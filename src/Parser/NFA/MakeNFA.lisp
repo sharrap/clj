@@ -115,7 +115,6 @@
                          (cons `(separate-exprs ,sym ((,@(cdr item) ,sym) ())) newrules))
                        sym))
                      (t (error (concatenate 'string "Unrecognized: " (symbol-name (car item))))))))))
-    (format t "Registering new rule... ~a --> ~a~%" rulename newforms)
    `(progn
       ,@newrules
       (register-rule (quote ,rulename) (quote ,newforms)))))
@@ -192,26 +191,28 @@
                  (setf worklist2 (cdr worklist2)))))))
       firsthash)))
 
-(defun get-new-items (startitems prodhash)
+(defun get-new-items (startitems prodhash ntermhash)
   (remove-if-not #'identity
     (reduce #'nconc
       (loop for item in startitems collect
-        (let* ((lhs (car (lritem-postdot item)))
-               (prods (gethash lhs prodhash)))
-          (when prods
-            (loop for prod in prods collect
+        (let ((lhs (car (lritem-postdot item))))
+          (when (not (gethash lhs ntermhash))
+            (setf (gethash lhs ntermhash) T)
+            (loop for prod in (gethash lhs prodhash) collect
               (new-lritem lhs prod)))))
       :from-end t)))
 
 (defun make-lrstate (startitems prodhash)
-  (labels ((newstate (items state)
-             (let* ((news (get-new-items items prodhash))
-                    (state2 (uniq-cls #'lritem-hash #'lritem-equal
-                                      state news)))
-               (if (eql (length state2) (length state))
-                   state
-                   (newstate news state2)))))
-    (new-lrstate (newstate startitems startitems))))
+  (let ((ntermhash (make-hash-table :test #'eql)))
+    (labels ((newstate (items state)
+               (let* ((news (get-new-items items prodhash ntermhash))
+                      (state2 (uniq-cls #'lritem-hash #'lritem-equal
+                                        state news)))
+                 (if (eql (length state2) (length state))
+                     state
+                     (newstate news state2)))))
+      (let ((st (newstate startitems startitems)))
+        (new-lrstate st)))))
 
 (defun possible-transitions (state)
   (uniq (remove-if-not #'identity
