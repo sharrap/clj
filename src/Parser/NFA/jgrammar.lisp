@@ -292,7 +292,7 @@
 
 (defrule FormalParameters
   (FormalParameter {|comma| FormalParameter})
-  (ReceiverParameter {|comma| FormalParameter))
+  (ReceiverParameter {|comma| FormalParameter}))
 
 (defrule FormalParameter
   ({VariableModifier} UnannType VariableDeclaratorId))

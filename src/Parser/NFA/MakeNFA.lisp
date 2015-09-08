@@ -66,7 +66,8 @@
              (cond ((not form)
                     (if (eql sym NIL)
                         (reverse acc)
-                        (error "Unexpected end of input")))
+                        (error (concatenate 'string "Unexpected end of input in form "
+                                            (prin1-to-string frm)))))
                    ((eql (car form) sym)
                     (list (cons (identsym sym)
                                 (reverse acc))
@@ -101,17 +102,17 @@
                      ((eql (car item) 'any)
                       (let ((sym (genanysym)))
                        (setf newrules
-                         (cons `(defrule ,sym ,@(mapcar (lambda (x) (list x)) (cdr item))) newrules))
+                         (cons `(separate-exprs ,sym (,@(mapcar (lambda (x) (list x)) (cdr item)))) newrules))
                        sym))
                      ((eql (car item) 'optional)
                       (let ((sym (genoptionalsym)))
                        (setf newrules
-                         (cons `(defrule ,sym ,(cdr item) ()) newrules))
+                         (cons `(separate-exprs ,sym (,(cdr item) ())) newrules))
                        sym))
                      ((eql (car item) 'repeat)
                       (let ((sym (genrepeatsym)))
                        (setf newrules
-                         (cons `(defrule ,sym (,@(cdr item) ,sym) ()) newrules))
+                         (cons `(separate-exprs ,sym ((,@(cdr item) ,sym) ())) newrules))
                        sym))
                      (t (error (concatenate 'string "Unrecognized: " (symbol-name (car item))))))))))
    `(progn
