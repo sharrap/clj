@@ -111,7 +111,7 @@
                      ((eql (car item) 'repeat)
                       (let ((sym (genrepeatsym)))
                        (setf newrules
-                         (cons `(defrule ,sym (,(cdr item) ,sym) ()) newrules))
+                         (cons `(defrule ,sym (,@(cdr item) ,sym) ()) newrules))
                        sym))
                      (t (error (concatenate 'string "Unrecognized: " (symbol-name (car item))))))))))
    `(progn
@@ -263,14 +263,14 @@
           (when (not exitp) (return))
           (print v))))))
 
-(defun check-correctness (nonterms terms prods)
+(defun check-correctness (nonterms termhash prodhash)
   (loop for nonterm in nonterms do
-    (let ((prods (gethash nonterm prods)))
+    (let ((prods (gethash nonterm prodhash)))
       (loop for prod in prods do
         (loop for sym in prod do
-          (multiple-value-bind (v existsp) (gethash sym prods)
+          (multiple-value-bind (v existsp) (gethash sym prodhash)
             (declare (ignore v))
-            (multiple-value-bind (v existsp2) (gethash sym terms)
+            (multiple-value-bind (v existsp2) (gethash sym termhash)
               (declare (ignore v))
               (when (not (or existsp existsp2))
                 (error (concatenate 'string "Unrecognized symbol "
