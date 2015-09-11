@@ -1,3 +1,5 @@
+;Hello from git!
+
 (in-package :clj.parser.nfa)
 
 (defrule Literal
