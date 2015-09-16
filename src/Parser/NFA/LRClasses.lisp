@@ -11,10 +11,15 @@
     (format stream "~a -> ~a . ~a" (lritem-lhs obj) (lritem-predot obj)
                                    (lritem-postdot obj))))
 
+(declaim (ftype function lrstate-id))
+
 (let ((x 0))
+  (defun try-free-lrstate (state)
+    (when (eql (- x 1) (lrstate-id state))
+      (decf x 1)))
   (defun uniq-id ()
     (let ((y x))
-      (setf x (+ x 1))
+      (incf x 1)
       y)))
 
 (defclass lrstate ()
@@ -25,9 +30,20 @@
               :initarg :transhash)
    (reductions :accessor lrstate-reductions :initform NIL :initarg :reductions)))
 
+(defun render-transitions (lrs)
+  (let ((str ""))
+    (with-hash-table-iterator (it (lrstate-transhash lrs))
+      (loop
+        (multiple-value-bind (entryp k v) (it)
+          (if entryp
+              (setf str
+                    (concatenate 'string str (symbol-name k) " --> " (write-to-string (lrstate-id v)) ", "))
+              (return)))))
+    str))
+
 (defmethod print-object ((obj lrstate) stream)
   (print-unreadable-object (obj stream :type t :identity nil)
-    (format stream "~a: [~a]" (lrstate-id obj) (lrstate-items obj))))
+    (format stream "~a: [~a]~%Transitions:~%~a" (lrstate-id obj) (lrstate-items obj) (render-transitions obj))))
 
 
 (defun lritem-equal (item1 item2)
@@ -46,7 +62,7 @@
             (lritem-dot item) (lritem-postdot item)))))
 
 (defun lrstate-hash (state)
-  (lrstate-id state))
+  (apply #'+ (mapcar #'lritem-hash (lrstate-items state))))
 
 (defun clsset-from-items (items)
   (let ((clsset (make-clsset #'lritem-hash #'lritem-equal)))
@@ -57,6 +73,11 @@
 (defun lrstate-contains-items (state items)
   (with-slots (itemset) state
     (not (remove-if (lambda (x) (get-clsset x itemset)) items))))
+
+(defun lrstate-contains-only (state items)
+  (with-slots (itemset) state
+    (and (eql (length items) (length (lrstate-items state)))
+         (lrstate-contains-items state items))))
 
 (defun new-lrstate (items)
   (make-instance 'lrstate :items items

@@ -230,13 +230,15 @@
       (remove-if-not (lambda (x) (eql (car (lritem-postdot x)) trans))
         (lrstate-items state)))))
 
-(defun matching-state (states items)
+(defun matching-state (states state)
   (with-hash-table-iterator (it states)
     (loop
       (multiple-value-bind (existsp k v) (it)
         (declare (ignore k))
         (cond ((not existsp) (return))
-              ((lrstate-contains-items v items) (return v))
+              ((lrstate-contains-only v (lrstate-items state))
+                (try-free-lrstate state)
+                (return v))
               (T NIL))))))
 
 (defparameter *states* (make-hash-table))
@@ -245,9 +247,9 @@
   (let ((transhash (lrstate-transhash state)))
     (loop for trans in (possible-transitions state) do
       (let* ((follow (follow-transition state trans))
-             (match (matching-state *states* follow))
-             (target (or match
-                         (make-lrstate follow prodhash))))
+             (freshstate (make-lrstate follow prodhash))
+             (match (matching-state *states* freshstate))
+             (target (or match freshstate)))
         (setf (gethash trans transhash) target)
         (when (not match)
           (setf (gethash (lrstate-id target) *states*) target)
