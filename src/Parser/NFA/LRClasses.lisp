@@ -18,9 +18,7 @@
     (when (eql (- x 1) (lrstate-id state))
       (decf x 1)))
   (defun uniq-id ()
-    (let ((y x))
-      (incf x 1)
-      y)))
+    (prog1 x (incf x 1))))
 
 (defclass lrstate ()
   ((id        :accessor lrstate-id :initform (uniq-id) :initarg :id)
