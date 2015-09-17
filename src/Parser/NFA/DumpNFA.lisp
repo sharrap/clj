@@ -21,7 +21,7 @@
   `(deflrstate ,(lrstate-id state)
      ,(mapcar #'dump-item (lrstate-items state))
      ,(dump-transitions state)
-     ,(lrstate-reductions state)))
+     ,(mapcar #'dump-item (lrstate-reductions state))))
 
 (defun dump-nfa (outf-name states)
   (with-open-file (outf (pathname outf-name)
