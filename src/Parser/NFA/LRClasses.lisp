@@ -80,8 +80,7 @@
 (defun new-lrstate (items)
   (make-instance 'lrstate :items items
                           :itemset (clsset-from-items items)
-                          :reductions (remove-if-not
-                                       (lambda (x) (lritem-postdot x)) items)))
+                          :reductions (remove-if #'lritem-postdot items)))
 
 (defun new-lritem (lhs prod)
   (make-instance 'lritem :lhs lhs :postdot prod))
