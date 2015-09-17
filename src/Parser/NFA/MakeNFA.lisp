@@ -85,7 +85,7 @@
    `(let ((,x 0))
       (defun ,name ()
         (prog1
-          (make-symbol (concatenate 'string ,(symbol-name symprefix) (write-to-string ,x)))
+          (intern (concatenate 'string ,(symbol-name symprefix) (write-to-string ,x)))
           (incf ,x 1))))))
 
 (make-symgen genrepeatsym repeat)

@@ -20,7 +20,7 @@
   (|true|)
   (|false|))
 
-(defrule Type
+(defrule JType
   (PrimitiveType)
   (ReferenceType))
 
@@ -322,14 +322,14 @@
   (TypeVariable))
 
 (defrule MethodBody
-  (Block)
+  (JBlock)
   (|semi|))
 
 (defrule InstanceInitializer
-  (Block))
+  (JBlock))
 
 (defrule StaticInitializer
-  (|static| Block))
+  (|static| JBlock))
 
 (defrule ConstructorDeclaration
   ({ConstructorModifier} ConstructorDeclarator [Throws] ConstructorBody))
@@ -485,7 +485,7 @@
 (defrule VariableInitializerList
   (VariableInitializer {|comma| VariableInitializer}))
 
-(defrule Block
+(defrule JBlock
   (|lbrace| [BlockStatements] |rbrace|))
 
 (defrule BlockStatements
@@ -518,7 +518,7 @@
   (ForStatementNoShortIf))
 
 (defrule StatementWithoutTrailingSubstatement
-  (Block)
+  (JBlock)
   (EmptyStatement)
   (ExpressionStatement)
   (AssertStatement)
@@ -566,9 +566,9 @@
   (|assert| Expression |colon| Expression |semi|))
 
 (defrule SwitchStatement
-  (|switch| |lparen| Expression |rparen| SwitchBlock))
+  (|switch| |lparen| Expression |rparen| SwitchJBlock))
 
-(defrule SwitchBlock
+(defrule SwitchJBlock
   (|lbrace| {SwitchBlockStatementGroup} {SwitchLabel} |rbrace|))
 
 (defrule SwitchBlockStatementGroup
@@ -641,15 +641,15 @@
   (|throw| Expression |semi|))
 
 (defrule SynchronizedStatement
-  (|synchronized| |lparen| Expression |rparen| Block))
+  (|synchronized| |lparen| Expression |rparen| JBlock))
 
 (defrule TryStatement
-  (|try| Block Catches)
-  (|try| Block [Catches] Finally)
+  (|try| JBlock Catches)
+  (|try| JBlock [Catches] Finally)
   (TryWithResourcesStatement))
 
 (defrule Catches
-  (|catch| |lparen| CatchFormalParameter |rparen| Block))
+  (|catch| |lparen| CatchFormalParameter |rparen| JBlock))
 
 (defrule CatchFormalParameter
   ({VariableModifier} CatchType VariableDeclaratorId))
@@ -658,10 +658,10 @@
   (UnannClassType {|or| ClassType}))
 
 (defrule Finally
-  (|finally| Block))
+  (|finally| JBlock))
 
 (defrule TryWithResourcesStatement
-  (|try| ResourceSpecification Block [Catches] [Finally]))
+  (|try| ResourceSpecification JBlock [Catches] [Finally]))
 
 (defrule ResourceSpecification
   (|lparen| ResourceList [|semi|] |rparen|))
@@ -771,7 +771,7 @@
 
 (defrule LambdaBody
   (Expression)
-  (Block))
+  (JBlock))
 
 (defrule AssignmentExpression
   (ConditionalExpression)

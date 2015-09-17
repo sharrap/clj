@@ -9,7 +9,7 @@
 
 (defun dump-transitions (state)
   (let ((outl NIL))
-    (with-hash-table-iterator (it (lrstate-transitions state))
+    (with-hash-table-iterator (it (lrstate-transhash state))
       (loop
         (multiple-value-bind (entryp k v) (it)
           (if entryp
@@ -23,14 +23,24 @@
      ,(dump-transitions state)
      ,(mapcar #'dump-item (lrstate-reductions state))))
 
-(defun dump-nfa (outf-name states)
+(defun dump-nfa (outf-name)
   (with-open-file (outf (pathname outf-name)
                    :direction :output
                    :if-exists :supersede)
-    (with-hash-table-iterator (it states)
+    (with-hash-table-iterator (it *rulehash*)
+      (loop
+        (multiple-value-bind (entryp k v) (it)
+          (if entryp
+              (loop for production in v do
+                (prin1
+                  `(defproduction ,k ,production)
+                  outf)
+                (terpri outf))
+              (return)))))
+    (with-hash-table-iterator (it *states*)
       (loop
         (multiple-value-bind (entryp k v) (it)
           (declare (ignore k))
           (if entryp
-              (format outf "~a~%" (dump-state v))
+              (progn (prin1 (dump-state v) outf) (terpri outf))
               (return)))))))
