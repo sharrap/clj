@@ -242,6 +242,7 @@
               (T NIL))))))
 
 (defparameter *states* (make-hash-table))
+(defparameter *productions* (make-hash-table))
 
 (defun compute-transitions (state prodhash)
   (let ((transhash (lrstate-transhash state)))
@@ -288,12 +289,17 @@
 
 (defun generate-nfa ()
   (let ((nonterms NIL))
-    (with-hash-table-iterator (it *rulehash*)
-      (loop
-        (multiple-value-bind (entryp k v) (it)
-          (declare (ignore v))
-          (if entryp
-              (setf nonterms (cons k nonterms))
-              (return)))))
+    (let ((x 0))
+      (with-hash-table-iterator (it *rulehash*)
+        (loop
+          (multiple-value-bind (entryp k v) (it)
+            (if entryp
+                (progn
+                  (loop for item in v do
+                    (setf (gethash x *productions*)
+                          (cons k item))
+                    (incf x 1))
+                  (setf nonterms (cons k nonterms)))
+                (return))))))
     (check-correctness nonterms *termhash* *rulehash*)
     (compute-nfa *rulehash* *start-nonterminal*)))
