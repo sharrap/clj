@@ -60,7 +60,7 @@
             (lritem-dot item) (lritem-postdot item)))))
 
 (defun lrstate-hash (state)
-  (apply #'+ (mapcar #'lritem-hash (lrstate-items state))))
+  (lrstate-id state))
 
 (defun clsset-from-items (items)
   (let ((clsset (make-clsset #'lritem-hash #'lritem-equal)))
