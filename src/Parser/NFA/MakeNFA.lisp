@@ -53,28 +53,19 @@
 ;more meaningful (any, optional, repeat)
 (defun group-subexprs (frm)
   (labels ((closesym (sym)
-             (ecase sym
-                   (< '>)
-                   ({ '})
-                   ([ '])))
+             (ecase sym (< '>) ({ '}) ([ '])))
            (identsym (sym)
-             (ecase sym
-                   (> 'any)
-                   (] 'optional)
-                   (} 'repeat)))
+             (ecase sym (> 'any) (] 'optional) (} 'repeat)))
            (group (form acc sym)
-             (cond ((not form)
-                    (if (eql sym NIL)
-                        (reverse acc)
-                        (error (concatenate 'string "Unexpected end of input in form "
-                                            (prin1-to-string frm)))))
+             (cond ((and (not form) sym)
+                    (error (concatenate 'string
+                                        "Unexpected end of input in form "
+                                        (prin1-to-string frm))))
+                   ((not form) (reverse acc))
                    ((eql (car form) sym)
-                    (list (cons (identsym sym)
-                                (reverse acc))
+                    (list (cons (identsym sym) (reverse acc))
                           (cdr form)))
-                   ((or (eql (car form) '<)
-                        (eql (car form) '{)
-                        (eql (car form) '[))
+                   ((case (car form) (< T) ({ T) ([ T))
                     (let ((ans (group (cdr form) NIL (closesym (car form)))))
                       (group (cadr ans) (cons (car ans) acc) sym)))
                    (T (group (cdr form) (cons (car form) acc) sym)))))
@@ -85,7 +76,8 @@
    `(let ((,x 0))
       (defun ,name ()
         (prog1
-          (intern (concatenate 'string ,(symbol-name symprefix) (write-to-string ,x)))
+          (intern (concatenate 'string ,(symbol-name symprefix)
+                                       (write-to-string ,x)))
           (incf ,x 1))))))
 
 (make-symgen genrepeatsym repeat)
@@ -102,19 +94,25 @@
                      ((eql (car item) 'any)
                       (let ((sym (genanysym)))
                        (setf newrules
-                         (cons `(separate-exprs ,sym (,@(mapcar (lambda (x) (list x)) (cdr item)))) newrules))
+                         (cons `(separate-exprs ,sym
+                                                ,(mapcar #'list (cdr item)))
+                                newrules))
                        sym))
                      ((eql (car item) 'optional)
                       (let ((sym (genoptionalsym)))
                        (setf newrules
-                         (cons `(separate-exprs ,sym (,(cdr item) ())) newrules))
+                         (cons `(separate-exprs ,sym (,(cdr item) ()))
+                               newrules))
                        sym))
                      ((eql (car item) 'repeat)
                       (let ((sym (genrepeatsym)))
                        (setf newrules
-                         (cons `(separate-exprs ,sym ((,@(cdr item) ,sym) ())) newrules))
+                         (cons `(separate-exprs ,sym ((,@(cdr item) ,sym) ()))
+                               newrules))
                        sym))
-                     (t (error (concatenate 'string "Unrecognized: " (symbol-name (car item))))))))))
+                     (t (error (concatenate 'string
+                                            "Unrecognized: "
+                                            (symbol-name (car item))))))))))
    `(progn
       ,@newrules
       (register-rule (quote ,rulename) (quote ,newforms)))))
@@ -174,16 +172,18 @@
               (prods (gethash nonterm prodhash)))
          (labels ((get-first (prod)
                     (when prod
-                          (let ((cp (car prod)))
-                            (cond ((and (listp cp) (nullablep cp))
-                                   (reduce #'nconc (mapcar #'get-first (cdr cp))
-                                          :from-end t :initial-value (get-first (cdr prod))))
-                                  ((listp cp) (mapcar #'get-first (cdr cp))) 
-                                  ((not (gethash cp prodhash)) (list cp))
-                                  ((not (nullablep cp)) (gethash cp firsthash))
-                                  (T (append (gethash cp firsthash)
-                                             (get-first (cdr prod)))))))))
-           (let ((firsts (uniq (reduce #'nconc (mapcar #'get-first prods) :from-end t))))
+                      (let ((cp (car prod)))
+                       (cond ((and (listp cp) (nullablep cp))
+                              (reduce #'nconc (mapcar #'get-first (cdr cp))
+                                      :from-end t
+                                      :initial-value (get-first (cdr prod))))
+                              ((listp cp) (mapcar #'get-first (cdr cp))) 
+                              ((not (gethash cp prodhash)) (list cp))
+                              ((not (nullablep cp)) (gethash cp firsthash))
+                              (T (append (gethash cp firsthash)
+                                         (get-first (cdr prod)))))))))
+           (let ((firsts (uniq (reduce #'nconc (mapcar #'get-first prods)
+                                       :from-end t))))
              (if (not (equal firsts (gethash nonterm firsthash)))
                  (setf (gethash nonterm firsthash) firsts
                        worklist2 (append (gethash nonterm referredhash)
@@ -221,11 +221,12 @@
 
 (defun follow-transition (state trans)
   (labels ((move-dot (item)
-             (make-instance 'lritem :lhs (lritem-lhs item)
-                                    :dot (+ (lritem-dot item) 1)
-                                    :predot (append (lritem-predot item)
-                                                    (list (car (lritem-postdot item))))
-                                    :postdot (cdr (lritem-postdot item)))))
+             (make-instance 'lritem
+                            :lhs (lritem-lhs item)
+                            :dot (+ (lritem-dot item) 1)
+                            :predot (append (lritem-predot item)
+                                            (list (car (lritem-postdot item))))
+                            :postdot (cdr (lritem-postdot item)))))
     (mapcar #'move-dot
       (remove-if-not (lambda (x) (eql (car (lritem-postdot x)) trans))
         (lrstate-items state)))))
