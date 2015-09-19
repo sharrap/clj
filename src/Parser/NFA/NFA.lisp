@@ -23,7 +23,8 @@
 
 (defmacro deflrstate (idx &key (shift NIL) (reduce NIL))
   `(setf (gethash *lrstates* idx)
-         (make-instance 'lrnfastate :index ,idx
-                                    :shift ,(reduce #'fold-into-hashtable shift
-                                                    :initial-value (make-hash-table))
-                                    :reduce ,reduce)))
+         (make-instance 'lrnfastate
+                        :index ,idx
+                        :shift ,(reduce #'fold-into-hashtable shift
+                                        :initial-value (make-hash-table))
+                        :reduce ,reduce)))
