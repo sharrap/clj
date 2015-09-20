@@ -44,3 +44,11 @@
       (setf (gethash hashv internal-hash)
             (cons (cons item val)
                   (remove-if (lambda (x) (eql x prev)) v))))))
+
+(defmacro def-h-add-list (name hashfn)
+  `(defun ,name (hash ls)
+     (reduce (lambda (x y) (setf (,hashfn (car x) y) (cadr x)) y)
+             ls :initial-value hash)))
+
+(def-h-add-list (hash-add-list gethash))
+(def-h-add-list (clshash-add-list get-clshash))
