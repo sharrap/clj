@@ -47,8 +47,9 @@
 
 (defmacro def-h-add-list (name hashfn)
   `(defun ,name (hash ls)
-     (reduce (lambda (x y) (setf (,hashfn (car x) y) (cadr x)) y)
-             ls :initial-value hash)))
+     (loop for item in ls do
+       (setf (,hashfn (car item) hash) (cadr item)))
+     hash))
 
 (def-h-add-list (hash-add-list gethash))
 (def-h-add-list (clshash-add-list get-clshash))
