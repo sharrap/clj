@@ -9,4 +9,5 @@
 
 (defun lex-next-token (inp)
   (assert (typep inp 'istream))
-  (do-lex #'start-state inp))
+  (setf (istream-top inp) (do-lex #'start-state inp))
+  (istream-read inp))

@@ -35,7 +35,9 @@
 (defun get-possible-move-fns (inp statestack nodestack)
   (let* ((rhs (mapcar (get-possible-reduce-fn inp statestack nodestack)
                       (lrnfastate-reduce (car statestack))))
-         (tok (istream-read inp))
+         (tok (if (typep (istream-read inp) 'char)
+                  (lex-next-token inp)
+                  (istream-read inp)))
          (sym (if (typep tok 'clj.lexer:Token) (token-type tok) tok))
          (lhs (gethash sym (lrnfastate-shift (car statestack)))))
     (cond (lhs
