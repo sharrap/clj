@@ -2,11 +2,13 @@
 
 (defparameter *lrproductions* (make-hash-table))
 (defparameter *lrstates* (make-hash-table))
+(defparameter *lrterminals* (make-hash-table))
 
 (defclass lrproduction ()
   ((index :accessor lrproduction-index :initform NIL :initarg :index)
    (lhs   :accessor lrproduction-lhs   :initform NIL :initarg :lhs)
-   (rhs   :accessor lrproduction-rhs   :initform NIL :initarg :rhs)))
+   (rhs   :accessor lrproduction-rhs   :initform NIL :initarg :rhs)
+   (len   :accessor lrproduction-len   :initform NIL :initarg :len)))
 
 (defclass lrnfastate ()
   ((index  :accessor lrnfastate-index  :initform NIL :initarg :index)
@@ -14,17 +16,24 @@
    (reduce :accessor lrnfastate-reduce :initform NIL :initarg :reduce)))
 
 (defmacro defproduction (idx lhs rhs)
-  `(setf (gethash *lrproductions* idx)
-         (make-instance 'lrproduction :index ,idx :lhs ,lhs :rhs ,rhs)))
+  `(setf (gethash idx *lrproductions*)
+         (make-instance 'lrproduction :index ,idx :lhs (reintern ,lhs)
+                                      :rhs (mapcar #'reintern ,rhs)
+                                      :len ,(length rhs))))
 
-(defun fold-into-hashtable (item hash)
-  (setf (gethash (car item) hash) (cdr item))
-  hash)
+(defun deflrterminals (&rest terminals)
+  (loop for terminal in terminals do
+    (setf (gethash (reintern terminal) *lrterminals*) T)))
+
+(defun deflrterminal (terminal)
+  (setf (gethash (reintern terminal) *lrterminals*) T))
 
 (defmacro deflrstate (idx &key (shift NIL) (reduce NIL))
-  `(setf (gethash *lrstates* idx)
+  `(setf (gethash idx *lrstates*)
          (make-instance 'lrnfastate
                         :index ,idx
-                        :shift ,(reduce #'fold-into-hashtable shift
-                                        :initial-value (make-hash-table))
+                        :shift (hash-from-list
+                                  (mapcar (lambda (x)
+                                            (cons (reintern (car x)) (cdr x)))
+                                          shift))
                         :reduce ,reduce)))

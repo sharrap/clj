@@ -1,5 +1,5 @@
 (defpackage :clj.lexer
-  (:use :cl :clj.utils)
+  (:use :cl :clj.utils :clj.tok)
   (:export #:Token #:lex-next-token
            #:token-type #:token-value))
 

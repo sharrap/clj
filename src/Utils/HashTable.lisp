@@ -46,10 +46,15 @@
                   (remove-if (lambda (x) (eql x prev)) v))))))
 
 (defmacro def-h-add-list (name hashfn)
-  `(defun ,name (hash ls)
+  `(defun ,name (ls hash)
      (loop for item in ls do
-       (setf (,hashfn (car item) hash) (cadr item)))
+       (setf (,hashfn (car item) hash) (cdr item)))
      hash))
 
-(def-h-add-list (hash-add-list gethash))
-(def-h-add-list (clshash-add-list get-clshash))
+(def-h-add-list hash-add-list gethash)
+(def-h-add-list clshash-add-list get-clshash)
+
+(defun hash-from-list (elements)
+  (let ((hash (make-hash-table)))
+    (hash-add-list elements hash)
+    hash))

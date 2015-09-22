@@ -34,6 +34,15 @@
   (with-open-file (outf (pathname outf-name)
                    :direction :output
                    :if-exists :supersede)
+    (with-hash-table-iterator (it *termhash*)
+      (loop
+        (multiple-value-bind (entryp k v) (it)
+          (declare (ignore v))
+          (if entryp
+              (progn
+                (prin1 `(deflrterminal (quote ,k)) outf)
+                (terpri outf))
+              (return)))))
     (with-hash-table-iterator (it *productions*)
       (loop
         (multiple-value-bind (entryp k v) (it)

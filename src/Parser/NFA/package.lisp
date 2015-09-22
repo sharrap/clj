@@ -1,5 +1,5 @@
 (defpackage :clj.parser.nfa
-  (:use :cl :clj.utils)
+  (:use :cl :clj.utils :clj.tok)
   (:export #:defrule #:defterminals #:generate-nfa #:set-start-nonterminal
            #:dump-nfa #:deflrstate #:defproduction
            #:lrproduction #:lrproduction-index #:lrproduction-lhs #:lrproduction-rhs

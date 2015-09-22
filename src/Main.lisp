@@ -1,3 +1,4 @@
+(load "src/Tokens/package.lisp")
 (load "src/Utils/package.lisp")
 (load "src/Lexer/package.lisp")
 (load "src/Parser/package.lisp")

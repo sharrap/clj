@@ -9,7 +9,6 @@
            #:list-eqf #:list-hashf))
 
 (load "src/Utils/Function.lisp")
-(load "src/Utils/Utils.lisp")
 (load "src/Utils/Set.lisp")
 (load "src/Utils/HashTable.lisp")
 (load "src/Utils/Sequences.lisp")
