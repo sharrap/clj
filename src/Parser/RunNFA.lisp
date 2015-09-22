@@ -13,7 +13,7 @@
                (cons (list prod (take plen nodestack))
                      (nthcdr plen nodestack))))))
 
-(get-possible-shift-fn (inp statestack nodestack nextt n)
+(get-possible-shift-fn (inp statestack nodestack nextt n &key (hack NIL))
   (lambda (callback)
     (istream-next inp)
     (let ((resl (funcall callback
@@ -25,18 +25,33 @@
       (if resl
           resl
           (progn
-            (setf (istream-next inp) nextt)
+            (if hack
+              (progn
+                (istream-next inp)
+                (setf (istream-next inp) hack))
+              (setf (istream-next inp) nextt))
             NIL)))))
 
 (defun get-possible-move-fns (inp statestack nodestack)
-  (let ((rhs (mapcar (get-possible-reduce-fn inp statestack nodestack)
-                     (lrnfastate-reduce (car statestack))))
-        (lhs (gethash (istream-read inp) (lrnfastate-shift (car statestack)))))
-    (if lhs
-        (cons (get-possible-move-fn inp statestack nodestack
-                                    (istream-read inp) lhs)
-              rhs)
-        rhs)))
+  (let* ((rhs (mapcar (get-possible-reduce-fn inp statestack nodestack)
+                      (lrnfastate-reduce (car statestack))))
+         (tok (istream-read inp))
+         (sym (if (typep tok 'clj.lexer:Token) (token-type tok) tok))
+         (lhs (gethash sym (lrnfastate-shift (car statestack)))))
+    (cond (lhs
+            (cons (get-possible-shift-fn inp statestack nodestack sym lhs)
+                  rhs))
+          ((and (eql sym 'clj.tok:|rshift|)
+                (gethash 'clj.tok:|gt| (lrnfastate-shift (car statestack))))
+           (istream-next inp)
+           (let ((s (split-rshift tok)))
+             (setf (istream-next is) (cdr s))
+             (setf (istream-next is) (car s)))
+           ;Attempt to hack the parser
+           (cons (get-possible-shift-fn inp statestack nodestack sym lhs
+                                        :hack tok)
+                 rhs))
+          (T rhs))))
 
 (defun try-parse (moves)
   (when moves
