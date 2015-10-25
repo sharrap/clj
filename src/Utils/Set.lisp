@@ -1,5 +1,11 @@
 (in-package :clj.utils)
 
+;;;A utility Set class which is simply implemented as a hash table
+;;;with T values
+
+;;;Like clshash, supports arbitrary keys provided a hashing function
+;;;and equality predicate.
+
 (defclass class-set ()
   ((internal-hash :accessor internal-hash
                   :initform (make-hash-table :test #'eql)

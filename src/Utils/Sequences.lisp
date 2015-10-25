@@ -1,5 +1,9 @@
 (in-package :clj.utils)
 
+;;;Utility functions on sequences
+
+;;Remove duplicates from a list of simple types in linear time
+;;Does not preserve order
 (defun uniq (&rest lsts)
   (let ((hash (make-hash-table))
         (outls NIL))
