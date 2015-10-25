@@ -8,6 +8,9 @@
            #:make-clshash #:get-clshash
            #:list-eqf #:list-hashf))
 
+;;;clj.utils serves as a home of useful utility functions and classes
+;;;used throughout the compiler.
+
 (load "src/Utils/Function.lisp")
 (load "src/Utils/Set.lisp")
 (load "src/Utils/HashTable.lisp")

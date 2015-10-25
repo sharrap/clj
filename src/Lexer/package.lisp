@@ -3,6 +3,9 @@
   (:export #:Token #:lex-next-token
            #:token-type #:token-value #:split-rshift))
 
+;;;clj.lexer implements a lexer which is intended to be used token-by-token,
+;;;to allow for efficiency and parser hacking.
+
 (load "src/Lexer/Token.lisp")
 (load "src/Lexer/DFA.lisp")
 (load "src/Lexer/Lexer.lisp")
