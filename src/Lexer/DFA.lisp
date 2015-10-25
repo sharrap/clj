@@ -8,7 +8,7 @@
 (defparameter *keyword-hash* (make-hash-table :test #'equal))
 (defparameter *operator-hash* (make-hash-table :test #'equal))
 
-(hash-add-list *keyword-hash*
+(hash-add-list
   (mapcar (lambda (x) (cons x (intern x)))
           '("abstract"
             "assert"
@@ -62,9 +62,10 @@
             "try"
             "void"
             "volatile"
-            "while")))
+            "while"))
+  *keyword-hash*)
 
-(hash-add-list *operator-hash*
+(hash-add-list
   '(("<"    . |lt|)
     ("<="   . |leq|)
     (">"    . |gt|)
@@ -99,8 +100,18 @@
     ("|"    . |or|)
     ("||"   . |boolor|)
     ("|="   . |orassign|)
-    ("->"   . |rarrow|)))
+    ("->"   . |rarrow|))
+  *operator-hash*)
 
+(loop for hash in (list *operator-hash* *keyword-hash*) do
+  (with-hash-table-iterator (it hash)
+    (loop
+      (multiple-value-bind (entryp k v) (it)
+        (if entryp
+            (reintern v)
+            (return))))))
+
+;;Useful predicates
 (defun bin-digit-p (ch)
   (or (eql ch #\0) (eql ch #\1)))
 
@@ -112,6 +123,39 @@
       (and (char>= ch #\a) (char<= ch #\f))
       (and (char>= ch #\A) (char<= ch #\F))))
 
+(defun space-char-p (ch)
+  (findchr ch +whitespace+))
+
+;;Separators are (roughly) all characters which appear completely on their own
+;;and need not be separated by whitespace.
+(defun emit-separator (ch)
+  (make-instance 'Token :value NIL :type
+    (case ch
+      (#\{ '|lbrace|)
+      (#\} '|rbrace|)
+      (#\[ '|lbrack|)
+      (#\] '|rbrack|)
+      (#\( '|lparen|)
+      (#\) '|rparen|)
+      (#\, '|comma|)
+      (#\; '|semi|)
+      (#\@ '|at|)
+      (#\? '|question|))))
+
+;;Operators are characters used in expressions (roughly)
+;;This distinction is a bit hairy. The main difference is that
+;;operators may need to be joined (ie < < vs <<).
+(defun emit-oper (str)
+  (make-instance 'token :type (gethash str *operator-hash*) :value NIL))
+
+;;Identifier admitter. Checks if it can emit a keyword instead.
+(defun emit-identifier (id)
+  (let ((v (gethash id *keyword-hash*)))
+    (if v (make-instance 'Token :type v :value NIL)
+          (make-instance 'Token :type '|identifier| :value id))))
+
+;;Token emission functions for chars
+;;Emit a token given a string of digits in the appropriate base.
 (defun emit-oct (str)
   (let ((ans (parse-integer str :radix 8)))
     (if (> ans 255)
@@ -127,6 +171,9 @@
 (defun emit-char (str)
   (make-instance 'Token :type '|charlit| :value (char-code (char str 0))))
 
+;;Numeric emission functions
+;;Emit numeric tokens of a specified type via a digit string in
+;;the appropriate base.
 (defun make-int (base ex str)
   (let* ((ex2 (expt 2 (- ex 1)))
          (ext (* ex2 2))
@@ -172,9 +219,24 @@
                                     '|floatlit| '|doublelit|)
                           :value ans)))
 
-(defun space-char-p (ch)
-  (findchr ch +whitespace+))
-
+;;Part of the 'defstate' macro defined below.
+;;Describes a simple DSL for writing DFA states.
+;;This function handles the right hand side (roughly equivalent to the
+;;action in a cond expression).
+;;Actions:
+;;  record:      Save the token to the state's internal memory and continue.
+;;  emit:        Produce a token of the appropriate type and return to start.
+;;  emit-d:      Upon receiving the next input, ignore it and produce a token
+;;               of the appropriate type.
+;;  emit-with:   Pass the current memory to a specified function and
+;;               expect it to produce a token.
+;;  emit-with-d: A delayed version of emit-with above.
+;;  gotom:       Pass to a specified state and reconsidered the given char,
+;;               saving the char in the state's memory.
+;;  nextm:       Save the char in the state's memory and then transition to
+;;               the specified state.
+;;  <default>:   Execute the provided code.
+;;
 (defun defstate-rhs (name ch mem arg)
   (cond ((eql (car arg) 'record)
          `(curry (function ,name) (cons ,(if (cdr arg) (cadr arg) ch) ,mem)))
@@ -198,6 +260,20 @@
          `(curry (function ,(cadr arg)) ,mem))
         (T (car arg))))
 
+;;Part of the 'defstate' macro below.
+;;This function defines the left hand side (roughly equivalent to the
+;;condition in a cond expression) of the various state transitions.
+;;Actions:
+;;    is:        Check if the character equals a specific char
+;;    isf:       Check if the character equals a specific char and also
+;;               if the contents of memory satisfy a particular predicate.
+;;    ismem:     Check if the character equals a specific char and also
+;;               if the contents of memory thus far are a specific string.
+;;    in:        Check if the character is an element of a sequence.
+;;    <a list>:  Execute the provided function exactly as specified.
+;;    <default>: The provided value is expected to be a unary function which
+;;               returns a boolean value. Execute it with the current char
+;;               as its argument.
 (defun defstate-args (name ch mem arg)
   (let ((arg1 (car arg)))
     (cond ((eql arg1 'is)
@@ -220,20 +296,31 @@
           (T `((,(car arg) ,ch)
            ,(defstate-rhs name ch mem (cdr arg)))))))
 
-(defmacro defstate (name ch mem &rest args)
+;;Defines a new DFA state.
+;;Arguments:
+;;  name: The name of the state (also its function name when it is defun'd).
+;;  ch:   The name of the character variable passed to the function.
+;;  mem:  The name of the memory variable for the state, or NIL if no memory
+;;        is required.
+;;  args: A list of state transitions, described in defstate-args and
+;;        defstate-rhs above.
+(defmacro defstate (name ch mem &body args)
   `(defun ,name ,(if mem `(,mem ,ch) `(,ch))
     (cond ,@(mapcar (curry #'defstate-args name ch mem)
                     (remove-if-not #'identity args)))))
 
-(defun emit-identifier (id)
-  (let ((v (gethash id *keyword-hash*)))
-    (if v (make-instance 'Token :type v :value NIL)
-          (make-instance 'Token :type '|identifier| :value id))))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Actual DFA states follow
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defstate identifier-state ch str
   (alphanumericp record)
   (T emit-with emit-identifier))
 
+;;Different numeric types have to handle a fairly similar set of situations
+;;(type specificiers at the end, different bases, possibility to be recognized
+;;as a float, etc).
 (defmacro defnum-state (name base oracle &rest other)
   (let ((g (gensym))
         (under (gensym))
@@ -259,6 +346,7 @@
 (defun ftest (ch)
   (findchr ch "fFdD"))
 
+;;Tracks the exponentiation part of floats.
 (defmacro deffloatexp-state (name base)
   (let* ((main (gensym))
          (g (gensym))
@@ -283,6 +371,7 @@
 (deffloatexp-state hexfloatexp-state 16)
 (deffloatexp-state decfloatexp-state 10)
 
+;;Continues reading floating point numbers after the period
 (defmacro deffloatdot-state (name test expstate expteststr base)
   (let* ((under (gensym))
          (main (gensym))
@@ -306,20 +395,26 @@
 (deffloatdot-state hexfloatdot-state hex-digit-p hexfloatexp-state "pP" 16)
 (deffloatdot-state decfloatdot-state digit-char-p decfloatexp-state "eE" 10)
 
+;;Matches decimal numbers
 (defnum-state decnum-state 10 digit-char-p NIL
   (is #\e nextm decfloatexp-state)
   (is #\E nextm decfloatexp-state)
   (is #\. (curry #'decfloatdot-state (cons #\. str)))
   (ftest emit-with-d (lambda (_) (make-float 10 ch _))))
 
+;;Matches hexadecimal numbers
 (defnum-state hexnum-state 16 hex-digit-p
   (is #\p nextm hexfloatexp-state)
   (is #\P nextm hexfloatexp-state)
   (is #\. (curry #'hexfloatdot-state (cons #\. str))))
 
+;;Octal and Binary numbers don't admit floating point
 (defnum-state octnum-state 8 oct-digit-p NIL)
 (defnum-state binnum-state 2 bin-digit-p NIL)
 
+;;Zero could be a few things: A number, the beginning of a float,
+;;the beginning of an octal number, or the beginning of a hexadecimal
+;;number.
 (defstate zero-state ch NIL
   (is #\x nextm hexnum-state)
   (is #\X nextm hexnum-state)
@@ -329,31 +424,19 @@
   (digit-char-p gotom octnum-state)
   (T (make-int 10 32 "0")))
 
-(defun emit-separator (ch)
-  (make-instance 'Token :value NIL :type
-    (case ch
-      (#\{ '|lbrace|)
-      (#\} '|rbrace|)
-      (#\[ '|lbrack|)
-      (#\] '|rbrack|)
-      (#\( '|lparen|)
-      (#\) '|rparen|)
-      (#\, '|comma|)
-      (#\; '|semi|)
-      (#\@ '|at|)
-      (#\? '|question|))))
-
-(defun emit-oper (str)
-  (make-instance 'token :type (gethash str *operator-hash*) :value NIL))
-
+;;This isn't a very interesting state per se, it just
+;;gets the separator emission logic out of the main state.
 (defstate separator-state ch NIL
   (T (lambda (_) _ (emit-separator ch))))
 
+;;Line comment--eat characters until you see a newline.
 (defstate line-comment-state ch str
   (is #\linefeed emit '|comment|)
   (is #\return emit '|comment|)
   (T record))
 
+;;The block comment states bounce back and forth when *s are read
+;;to accurately parse block comments.
 (declaim (ftype function block-comment-end-state))
 
 (defstate block-comment-state ch str
@@ -364,6 +447,8 @@
   (is #\/ emit-d '|comment|)
   (T (block-comment-state (cons #\* str) ch)))
 
+;;Operator state: mostly responsible for joining together multi-character
+;;operators given shorter versions.
 (defstate operator-state ch str
   ((and (digit-char-p ch)
         (eql str '(#\-))) gotom decnum-state)
@@ -382,6 +467,7 @@
 
 (declaim (ftype function string-state))
 
+;;Properly records any escaped characters in strings.
 (defmacro srecord (ch)
   `(curry #'string-state (cons ,ch str)))
 
@@ -396,15 +482,13 @@
   (is #\' (srecord #\'))
   (T NIL))
 
-(defstate emit-string-state ch str
-  (is #\# emit '|strlit|) ;Suppress unused warnings
-  (T emit '|strlit|))
-
+;;Records string literals
 (defstate string-state ch str
-  (is #\" nextm emit-string-state)
+  (is #\" emit-d '|strlit|)
   (is #\\ nextm escaped-string-state)
   (T record))
 
+;;Records characters, including escaped characters
 (defstate done-char-state ch str
   (is #\' emit-with-d emit-char)
   (T NIL))
@@ -435,25 +519,33 @@
   (is #\f (crecord #\page))
   (T NIL))
 
+;;Identify an octal vs non-octal char.
+;;Unicode needs to be identified later.
 (defstate char-state ch NIL
   (is #\' NIL)
   (is #\0 gotom octal-char-state)
   (is #\\ #'escaped-char-state)
   (T (curry #'done-char-state (list ch))))
 
+;;Special state to identify the ... type.
 (defstate twodot-state ch NIL
   (is #\. emit-d '|threedots|)
   (T NIL))
 
+;;Identify the difference between raw .s, floats, and
+;;...s
 (defstate dot-state ch NIL
   (digit-char-p (curry #'decfloatdot-state (list ch #\. #\0)))
   (is #\. nextm twodot-state)
   (T emit '|dot|))
 
+;;Identify the difference between colons and double colons
 (defstate colon-state ch NIL
   (is #\: emit-d '|twocolons|)
   (T emit-d '|colon|))
 
+;;The main starting point for all tokens.
+;;Mostly serves as a dispatcher to simplify things.
 (defstate start-state ch NIL
   (alpha-char-p gotom identifier-state)
   (is #\$ gotom identifier-state)

@@ -8,7 +8,7 @@
   (assert (typep is 'istream))
   (when (not (istream-top is))
     (setf (istream-top is) (list (read-char (istream-stream is)))))
-    (istream-top is))
+    (car (istream-top is)))
 
 (defun istream-next (is)
    (assert (typep is 'istream))

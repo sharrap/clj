@@ -16,9 +16,9 @@
    (reduce :accessor lrnfastate-reduce :initform NIL :initarg :reduce)))
 
 (defmacro defproduction (idx lhs rhs)
-  `(setf (gethash idx *lrproductions*)
-         (make-instance 'lrproduction :index ,idx :lhs (reintern ,lhs)
-                                      :rhs (mapcar #'reintern ,rhs)
+  `(setf (gethash ,idx *lrproductions*)
+         (make-instance 'lrproduction :index ,idx :lhs (reintern (quote ,lhs))
+                                      :rhs (mapcar #'reintern (quote ,rhs))
                                       :len ,(length rhs))))
 
 (defun deflrterminals (&rest terminals)
@@ -29,11 +29,11 @@
   (setf (gethash (reintern terminal) *lrterminals*) T))
 
 (defmacro deflrstate (idx &key (shift NIL) (reduce NIL))
-  `(setf (gethash idx *lrstates*)
+  `(setf (gethash ,idx *lrstates*)
          (make-instance 'lrnfastate
                         :index ,idx
                         :shift (hash-from-list
                                   (mapcar (lambda (x)
                                             (cons (reintern (car x)) (cdr x)))
-                                          shift))
-                        :reduce ,reduce)))
+                                          (quote ,shift)))
+                        :reduce (quote ,reduce))))

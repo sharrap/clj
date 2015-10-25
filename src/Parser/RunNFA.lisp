@@ -4,8 +4,9 @@
 (defparameter *states* clj.parser.nfa:*lrstates*)
 (defparameter *terminals* clj.parser.nfa:*lrterminals*)
 
-(get-possible-reduce-fn (inp statestack nodestack)
-  (lambda (x &aux (prod (gethash x *prodhash*)) (plen (lrproduction-len prod)))
+(defun get-possible-reduce-fn (inp statestack nodestack)
+  (lambda (x &aux (prod (gethash x *productions*))
+                  (plen (lrproduction-len prod)))
     (lambda (callback)
       (funcall callback
                inp
@@ -13,7 +14,7 @@
                (cons (list prod (take plen nodestack))
                      (nthcdr plen nodestack))))))
 
-(get-possible-shift-fn (inp statestack nodestack nextt n &key (hack NIL))
+(defun get-possible-shift-fn (inp statestack nodestack nextt n &key (hack NIL))
   (lambda (callback)
     (istream-next inp)
     (let ((resl (funcall callback
@@ -33,9 +34,10 @@
             NIL)))))
 
 (defun get-possible-move-fns (inp statestack nodestack)
+  (format t "statestack: ~a~%" statestack)
   (let* ((rhs (mapcar (get-possible-reduce-fn inp statestack nodestack)
                       (lrnfastate-reduce (car statestack))))
-         (tok (if (typep (istream-read inp) 'char)
+         (tok (if (characterp (istream-read inp))
                   (lex-next-token inp)
                   (istream-read inp)))
          (sym (if (typep tok 'clj.lexer:Token) (token-type tok) tok))
@@ -43,12 +45,12 @@
     (cond (lhs
             (cons (get-possible-shift-fn inp statestack nodestack sym lhs)
                   rhs))
-          ((and (eql sym 'clj.tok:|rshift|)
-                (gethash 'clj.tok:|gt| (lrnfastate-shift (car statestack))))
+          ((and (eql sym (reintern '|rshift|))
+                (gethash (reintern '|gt|) (lrnfastate-shift (car statestack))))
            (istream-next inp)
            (let ((s (split-rshift tok)))
-             (setf (istream-next is) (cdr s))
-             (setf (istream-next is) (car s)))
+             (setf (istream-next inp) (cdr s))
+             (setf (istream-next inp) (car s)))
            ;Attempt to hack the parser
            (cons (get-possible-shift-fn inp statestack nodestack sym lhs
                                         :hack tok)
@@ -63,8 +65,9 @@
           (try-parse (cdr moves))))))
 
 (defun parse (inp statestack nodestack)
-  (let ((moves (get-possible-reduce-fns inp statestack nodestack))
-    (try-parse moves))))
+  (let ((moves (get-possible-move-fns inp statestack nodestack)))
+    (format t "Candidate moves: ~a~%" moves)
+    (try-parse moves)))
 
 (defun do-parse (inp)
   (parse inp (list (gethash 0 *states*)) NIL))
