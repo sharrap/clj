@@ -37,3 +37,38 @@
                          (remove-if (lambda (x) (funcall eqf x item)) v))))
             (val (setf (gethash hashv internal-hash) (cons item v)))
             (T NIL)))))
+
+(defun list-to-clsset (lst hash-fn eq-fn)
+  (let ((set (make-clsset hash-fn eq-fn)))
+    (loop :for item :in lst
+          :do (setf (get-clsset item set) T))))
+
+;Assume that the two have the same hash and equality functions
+(defun clsset-union (set1 set2)
+  (let ((result (make-clsset (hashf set1) (eqf set1))))
+    (loop :for item :in `(,set1 ,set2)
+          :do (with-hash-table-iterator (iterator (internal-hash item))
+                (loop
+                  (multiple-value-bind (entry-p key value) (iterator)
+                    (declare (ignore value))
+                    (if entry-p (setf (get-clsset key result) T) (return))))))
+    result))
+
+(defun clsset-intersection (set1 set2)
+  (let ((result (make-clsset (hashf set1) (eqf set1))))
+    (with-hash-table-iterator (iterator (internal-hash set1))
+      (loop
+        (multiple-value-bind (entry-p key value) (iterator)
+          (declare (ignore value))
+          (if entry-p (setf (get-clsset key result) (get-clsset key set2)) (return)))))
+    result))
+
+(defun clsset-difference (set1 set2)
+  (let ((result (clsset-union set1 (make-clsset (hashf set1) (eqf set1)))))
+    (with-hash-table-iterator (iterator (internal-hash set2))
+      (loop
+        (multiple-value-bind (entry-p key value) (iterator)
+          (declare (ignore value))
+          (if entry-p (setf (get-clsset key result) nil) (return)))))
+    result))
+

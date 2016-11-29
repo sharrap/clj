@@ -30,3 +30,12 @@
             (setf (get-clsset item hash) T)
             (setf outls (cons item outls))))))
     outls))
+
+;Split a sequence according to a delimiter
+(defun split-sequence (delimiter sequence &key (remove-empty Nil))
+  (let ((length (length sequence)))
+    (loop :for left := 0 :then (+ right 1)
+          :for right := (or (position delimiter sequence :start left) length)
+          :unless (and (= left right) remove-empty)
+          :collect (subseq sequence left right)
+          :until (>= right length))))
