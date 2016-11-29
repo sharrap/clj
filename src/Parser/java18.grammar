@@ -1,0 +1,581 @@
+Type PrimitiveType 
+Type ReferenceType
+PrimitiveType Annotations NumericType 
+PrimitiveType Annotations boolean
+Annotations Annotation Annotations
+Annotations
+NumericType IntegralType
+NumericType FloatingPointType
+IntegralType byte
+IntegralType short
+IntegralType int
+IntegralType long
+IntegralType char
+FloatingPointType float
+FloatingPointType double
+ReferenceType ClassOrInterfaceType
+ReferenceType TypeVariable
+ReferenceType ArrayType
+ClassOrInterfaceType Annotations Identifier OptionalTypeArguments
+ClassOrInterfaceType ClassOrInterfaceType . Annotations Identifier OptionalTypeArguments
+OptionalTypeArguments TypeArguments
+OptionalTypeArguments
+TypeVariable Annotations Identifier
+ArrayType PrimitiveType Dims
+ArrayType ClassOrInterfaceType Dims 
+ArrayType TypeVariable Dims
+Dims Annotations [ ]
+Dims Annotations [ ] Dims
+TypeParameter TypeParameterModifiers Identifier OptionalTypeBound
+TypeParameterModifiers TypeParameterModifier TypeParameterModifiers
+TypeParameterModifiers
+TypeParameterModifier Annotation
+OptionalTypeBound TypeBound
+OptionalTypeBound
+TypeBound extends TypeVariable 
+TypeBound extends ClassOrInterfaceType AdditionalBounds
+AdditionalBounds AdditionalBound AdditionalBounds
+AdditionalBounds
+AdditionalBound & InterfaceType
+TypeArguments < TypeArgumentList >
+TypeArgumentList TypeArgument
+TypeArgumentList TypeArgument , TypeArgumentList
+TypeArgument ReferenceType 
+TypeArgument Wildcard
+Wildcard Annotations ? OptionalWildcardBounds
+OptionalWildcardBounds WildcardBounds
+OptionalWildcardBounds
+WildcardBounds extends ReferenceType 
+WildcardBounds super ReferenceType
+
+TypeName Identifier 
+TypeName PackageOrTypeName . Identifier
+PackageOrTypeName Identifier 
+PackageOrTypeName PackageOrTypeName . Identifier
+ExpressionName Identifier 
+ExpressionName AmbiguousName . Identifier
+MethodName Identifier 
+PackageName Identifier 
+PackageName PackageName . Identifier
+AmbiguousName Identifier 
+AmbiguousName AmbiguousName . Identifier
+
+CompilationUnit OptionalPackageDeclaration ImportDeclarations TypeDeclarations
+OptionalPackageDeclaration PackageDeclaration
+OptionalPackageDeclaration
+ImportDeclarations ImportDeclaration ImportDeclarations
+ImportDeclarations
+TypeDeclarations TypeDeclaration TypeDeclarations
+TypeDeclarations
+PackageDeclaration PackageModifiers package Identifier DottedIdentifiers ;
+DottedIdentifiers . Identifier
+DottedIdentifiers
+PackageModifiers PackageModifier PackageModifiers
+PackageModifiers
+PackageModifier Annotation
+ImportDeclaration SingleTypeImportDeclaration 
+ImportDeclaration TypeImportOnDemandDeclaration 
+ImportDeclaration SingleStaticImportDeclaration 
+ImportDeclaration StaticImportOnDemandDeclaration
+SingleTypeImportDeclaration import TypeName ;
+TypeImportOnDemandDeclaration import PackageOrTypeName . * ;
+SingleStaticImportDeclaration import static TypeName . Identifier ;
+StaticImportOnDemandDeclaration import static TypeName . * ;
+TypeDeclaration ClassDeclaration 
+TypeDeclaration InterfaceDeclaration 
+TypeDeclaration ;
+
+ClassDeclaration NormalClassDeclaration 
+ClassDeclaration EnumDeclaration
+NormalClassDeclaration ClassModifiers class Identifier OptionalTypeParameters OptionalSuperclass OptionalSuperinterfaces ClassBody
+ClassModifiers ClassModifier ClassModifiers
+ClassModifiers
+ClassModifier Annotation
+ClassModifier public
+ClassModifier protected
+ClassModifier private 
+ClassModifier abstract
+ClassModifier static
+ClassModifier final
+ClassModifier strictfp
+OptionalTypeParameters TypeParameters
+OptionalTypeParameters
+TypeParameters < TypeParameterList >
+TypeParameterList TypeParameter , TypeParemeterList
+TypeParameterList TypeParameter
+OptionalSuperclass Superclass
+OptionalSuperclass
+Superclass extends ClassType
+OptionalSuperinterfaces Superinterfaces
+OptionalSuperinterfaces
+Superinterfaces implements InterfaceTypeList
+InterfaceTypeList InterfaceType , InterfaceTypeList
+InterfaceTypeList InterfaceType
+ClassBody { ClassBodyDeclarations }
+ClassBodyDeclarations ClassBodyDeclaration ClassBodyDeclarations
+ClassBodyDeclarations
+ClassBodyDeclaration ClassMemberDeclaration 
+ClassBodyDeclaration InstanceInitializer 
+ClassBodyDeclaration StaticInitializer 
+ClassBodyDeclaration ConstructorDeclaration
+ClassMemberDeclaration FieldDeclaration 
+ClassMemberDeclaration MethodDeclaration 
+ClassMemberDeclaration ClassDeclaration 
+ClassMemberDeclaration InterfaceDeclaration 
+ClassMemberDeclaration ;
+FieldDeclaration FieldModifiers UnannType VariableDeclaratorList ;
+FieldModifiers FieldModifier FieldModifiers
+FieldModifiers
+FieldModifier Annotation
+FieldModifier public
+FieldModifier protected
+FieldModifier private
+FieldModifier static
+FieldModifier final
+FieldModifier transient
+FieldModifier volatile
+VariableDeclaratorList VariableDeclarator , VariableDeclaratorList
+VariableDeclaratorList VariableDeclarator
+VariableDeclarator VariableDeclaratorId
+VariableDeclarator VariableDeclaratorId = VariableInitializer
+VariableDeclaratorId Identifier OptionalDims
+OptionalDims Dims
+OptionalDims
+VariableInitializer Expression 
+VariableInitializer ArrayInitializer
+UnannType UnannPrimitiveType 
+UnannType UnannReferenceType
+UnannPrimitiveType NumericType 
+UnannPrimitiveType boolean
+UnannReferenceType UnannClassOrInterfaceType 
+UnannReferenceType UnannTypeVariable 
+UnannReferenceType UnannArrayType
+UnannClassOrInterfaceType Identifier OptionalTypeArguments 
+UnannClassOrInterfaceType UnannClassOrInterfaceType . Annotations Identifier OptionalTypeArguments
+UnannTypeVariable Identifier
+UnannArrayType UnannPrimitiveType Dims 
+UnannArrayType UnannClassOrInterfaceType Dims 
+UnannArrayType UnannTypeVariable Dims
+MethodDeclaration MethodModifiers MethodHeader MethodBody
+MethodModifiers MethodModifier MethodModifiers
+MethodModifiers
+MethodModifier Annotation
+MethodModifier public
+MethodModifier protected
+MethodModifier private
+MethodModifier abstract
+MethodModifier static
+MethodModifier final
+MethodModifier synchronized
+MethodModifier native
+MethodModifier strictfp
+MethodHeader Result MethodDeclarator OptionalThrows 
+MethodHeader TypeParameters Annotations Result MethodDeclarator OptionalThrows
+OptionalThrows Throws
+OptionalThrows
+Result UnannType 
+Result void
+MethodDeclarator Identifier ( OptionalFormalParameterList ) OptionalDims
+OptionalFormalParameterList FormalParameterList
+OptionalFormalParameterList
+FormalParameterList ReceiverParameter 
+FormalParameterList FormalParameters , LastFormalParameter 
+FormalParameterList LastFormalParameter
+FormalParameters FormalParameter MoreFormalParameters
+FormalParameters ReceiverParameter MoreFormalParameters
+FormalParameter VariableModifiers UnannType VariableDeclaratorId
+VariableModifiers VariableModifier VariableModifiers
+VariableModifiers
+MoreFormalParameters , FormalParameter MoreFormalParameters
+MoreFormalParameters
+VariableModifier Annotation
+VariableModifier final
+LastFormalParameter VariableModifiers UnannType Annotations ... VariableDeclaratorId 
+LastFormalParameter FormalParameter
+ReceiverParameter Annotations UnannType this
+ReceiverParameter Annotations UnannType Identifier . this
+Throws throws ExceptionTypeList
+ExceptionTypeList ExceptionType , ExceptionTypeList
+ExceptionTypeList ExceptionType
+ExceptionType ClassOrInterfaceType 
+ExceptionType TypeVariable
+MethodBody Block 
+MethodBody ;
+InstanceInitializer Block
+StaticInitializer static Block
+ConstructorDeclaration ConstructorModifiers ConstructorDeclarator OptionalThrows ConstructorBody
+ConstructorModifiers ConstructorModifier ConstructorModifiers
+ConstructorModifiers
+ConstructorModifier Annotation
+ConstructorModifier public
+ConstructorModifier protected
+ConstructorModifier private
+ConstructorDeclarator OptionalTypeParameters SimpleTypeName ( OptionalFormalParameterList )
+SimpleTypeName Identifier
+ConstructorBody { OptionalExplicitConstructorInvocation OptionalBlockStatements }
+OptionalExplicitConstructorInvocation ExplicitConstructorInvocation
+OptionalExplicitConstructorInvocation
+ExplicitConstructorInvocation OptionalTypeArguments this ( OptionalArgumentList ) ; 
+ExplicitConstructorInvocation OptionalTypeArguments super ( OptionalArgumentList ) ; 
+ExplicitConstructorInvocation ExpressionName . OptionalTypeArguments super ( OptionalArgumentList ) ; 
+ExplicitConstructorInvocation Primary . OptionalTypeArguments super ( OptionalArgumentList ) ;
+OptionalArgumentList ArgumentList
+OptionalArgumentList
+OptionalBlockStatements BlockStatements
+OptionalBlockStatements
+EnumDeclaration ClassModifiers enum Identifier OptionalSuperinterfaces EnumBody
+EnumBody { OptionalEnumConstantList OptionalComma OptionalEnumBodyDeclarations }
+OptionalComma ,
+OptionalComma
+OptionalEnumConstantList EnumConstantList
+OptionalEnumConstantList
+EnumConstantList EnumConstant , EnumConstantList
+EnumConstantList EnumConstant
+EnumConstant EnumConstantModifiers Identifier OptionalParenthesizedArgumentList OptionalClassBody
+OptionalParenthesizedArgumentList ( OptionalArgumentList )
+OptionalParenthesizedArgumentList
+EnumConstantModifiers EnumConstantModifier EnumConstantModifiers
+EnumConstantModifiers
+EnumConstantModifier Annotation
+OptionalEnumBodyDeclarations EnumBodyDeclarations
+OptionalEnumBodyDeclarations
+EnumBodyDeclarations ; ClassBodyDeclarations
+OptionalClassBody ClassBody
+OptionalClassBody
+
+
+InterfaceDeclaration NormalInterfaceDeclaration 
+InterfaceDeclaration AnnotationTypeDeclaration
+NormalInterfaceDeclaration InterfaceModifiers interface Identifier OptionalTypeParameters OptionalExtendsInterfaces InterfaceBody
+InterfaceModifiers InterfaceModifier InterfaceModifiers
+InterfaceModifiers
+InterfaceModifier Annotation
+InterfaceModifier public
+InterfaceModifier protected
+InterfaceModifier private 
+InterfaceModifier abstract
+InterfaceModifier static
+InterfaceModifier strictfp
+OptionalExtendsInterfaces ExtendsInterfaces
+OptionalExtendsInterfaces
+ExtendsInterfaces extends InterfaceTypeList
+InterfaceBody { InterfaceMemberDeclarations }
+InterfaceMemberDeclarations InterfaceMemberDeclaration
+InterfaceMemberDeclarations
+InterfaceMemberDeclaration ConstantDeclaration 
+InterfaceMemberDeclaration InterfaceMethodDeclaration 
+InterfaceMemberDeclaration ClassDeclaration 
+InterfaceMemberDeclaration InterfaceDeclaration 
+InterfaceMemberDeclaration ;
+ConstantDeclaration ConstantModifiers UnannType VariableDeclaratorList ;
+ConstantModifiers ConstantModifier ConstantModifiers
+ConstantModifiers
+ConstantModifier Annotation
+ConstantModifier public 
+ConstantModifier static
+ConstantModifier final
+InterfaceMethodDeclaration InterfaceMethodModifiers MethodHeader MethodBody
+InterfaceMethodModifiers InterfaceMethodModifier InterfaceMethodModifiers
+InterfaceMethodModifiers
+InterfaceMethodModifier Annotation
+InterfaceMethodModifier public 
+InterfaceMethodModifier abstract
+InterfaceMethodModifier default
+InterfaceMethodModifier static
+InterfaceMethodModifier strictfp
+AnnotationTypeDeclaration InterfaceModifiers @ interface Identifier AnnotationTypeBody
+AnnotationTypeBody { AnnotationTypeMemberDeclarations }
+AnnotationTypeMemberDeclarations AnnotationTypeMemberDeclaration AnnotationTypeMemberDeclarations
+AnnotationTypeMemberDeclarations
+AnnotationTypeMemberDeclaration AnnotationTypeElementDeclaration 
+AnnotationTypeMemberDeclaration ConstantDeclaration 
+AnnotationTypeMemberDeclaration ClassDeclaration 
+AnnotationTypeMemberDeclaration InterfaceDeclaration 
+AnnotationTypeMemberDeclaration ;
+AnnotationTypeElementDeclaration AnnotationTypeElementModifiers UnannType Identifier ( ) OptionalDims OptionalDefaultValue ;
+AnnotationTypeElementModifiers AnnotationTypeElementModifier AnnotationTypeElementModifiers
+AnnotationTypeElementModifiers
+AnnotationTypeElementModifier Annotation
+AnnotationTypeElementModifier public 
+AnnotationTypeElementModifier abstract
+OptionalDefaultValue DefaultValue
+OptionalDefaultValue
+DefaultValue default ElementValue
+Annotation NormalAnnotation 
+Annotation MarkerAnnotation 
+Annotation SingleElementAnnotation
+NormalAnnotation @ TypeName ( OptionalElementValuePairList )
+OptionalElementValuePairList ElementValuePairList
+OptionalElementValuePairList
+ElementValuePairList ElementValuePair , ElementValuePairList
+ElementValuePairList ElementValuePair
+ElementValuePair Identifier = ElementValue
+ElementValue ConditionalExpression 
+ElementValue ElementValueArrayInitializer 
+ElementValue Annotation
+ElementValueArrayInitializer { OptionalElementValueList OptionalComma }
+OptionalElementValueList ElementValueList
+OptionalElementValueList
+ElementValueList ElementValue , ElementValueList
+ElementValueList ElementValue
+MarkerAnnotation @ TypeName
+SingleElementAnnotation @ TypeName ( ElementValue )
+
+
+ArrayInitializer { OptionalVariableInitializerList OptionalComma }
+OptionalVariableInitializerList VariableInitializerList
+OptionalVariableInitializerList
+VariableInitializerList VariableInitializer , VariableInitializerList
+VariableInitializerList VariableInitializer
+
+
+Block { OptionalBlockStatements }
+BlockStatements BlockStatement
+BlockStatements BlockStatement BlockStatements
+BlockStatement LocalVariableDeclarationStatement 
+BlockStatement ClassDeclaration 
+BlockStatement Statement
+LocalVariableDeclarationStatement LocalVariableDeclaration ;
+LocalVariableDeclaration VariableModifiers UnannType VariableDeclaratorList
+Statement StatementWithoutTrailingSubstatement 
+Statement LabeledStatement 
+Statement IfThenStatement 
+Statement IfThenElseStatement 
+Statement WhileStatement 
+Statement ForStatement
+StatementNoShortIf StatementWithoutTrailingSubstatement 
+StatementNoShortIf LabeledStatementNoShortIf 
+StatementNoShortIf IfThenElseStatementNoShortIf 
+StatementNoShortIf WhileStatementNoShortIf 
+StatementNoShortIf ForStatementNoShortIf
+StatementWithoutTrailingSubstatement Block 
+StatementWithoutTrailingSubstatement EmptyStatement 
+StatementWithoutTrailingSubstatement ExpressionStatement 
+StatementWithoutTrailingSubstatement AssertStatement 
+StatementWithoutTrailingSubstatement SwitchStatement 
+StatementWithoutTrailingSubstatement DoStatement 
+StatementWithoutTrailingSubstatement BreakStatement 
+StatementWithoutTrailingSubstatement ContinueStatement 
+StatementWithoutTrailingSubstatement ReturnStatement 
+StatementWithoutTrailingSubstatement SynchronizedStatement 
+StatementWithoutTrailingSubstatement ThrowStatement 
+StatementWithoutTrailingSubstatement TryStatement
+EmptyStatement ;
+LabeledStatement Identifier : Statement
+LabeledStatementNoShortIf Identifier : StatementNoShortIf
+ExpressionStatement StatementExpression ;
+StatementExpression Assignment 
+StatementExpression PreIncrementExpression 
+StatementExpression PreDecrementExpression 
+StatementExpression PostIncrementExpression 
+StatementExpression PostDecrementExpression 
+StatementExpression MethodInvocation 
+StatementExpression ClassInstanceCreationExpression
+IfThenStatement if ( Expression ) Statement
+IfThenElseStatement if ( Expression ) StatementNoShortIf else Statement
+IfThenElseStatementNoShortIf if ( Expression ) StatementNoShortIf else StatementNoShortIf
+AssertStatement assert Expression ; 
+AssertStatement assert Expression : Expression ;
+SwitchStatement switch ( Expression ) SwitchBlock
+SwitchBlock { SwitchBlockStatementGroups RepeatSwitchLabel }
+SwitchBlockStatementGroups SwitchBlockStatementGroup SwitchBlockStatementGroups
+SwitchBlockStatementGroups
+RepeatSwitchLabel SwitchLabel RepeatSwitchLabel
+RepeatSwitchLabel
+SwitchBlockStatementGroup SwitchLabels BlockStatements
+SwitchLabels SwitchLabel RepeatSwitchLabel
+SwitchLabel case ConstantExpression : 
+SwitchLabel case EnumConstantName : 
+SwitchLabel default :
+EnumConstantName Identifier
+WhileStatement while ( Expression ) Statement
+WhileStatementNoShortIf while ( Expression ) StatementNoShortIf
+DoStatement do Statement while ( Expression ) ;
+ForStatement BasicForStatement 
+ForStatement EnhancedForStatement
+ForStatementNoShortIf BasicForStatementNoShortIf 
+ForStatementNoShortIf EnhancedForStatementNoShortIf
+BasicForStatement for ( OptionalForInit ; OptionalExpression ; OptionalForUpdate ) Statement
+BasicForStatementNoShortIf for ( OptionalForInit ; OptionalExpression ; OptionalForUpdate ) StatementNoShortIf
+OptionalForInit ForInit
+OptionalForInit
+OptionalExpression Expression
+OptionalExpression
+OptionalForUpdate ForUpdate
+OptionalForUpdate
+ForInit StatementExpressionList 
+ForInit LocalVariableDeclaration
+ForUpdate StatementExpressionList
+StatementExpressionList StatementExpression , StatementExpressionList
+StatementExpressionList StatementExpression
+EnhancedForStatement for ( VariableModifiers UnannType VariableDeclaratorId : Expression ) Statement
+EnhancedForStatementNoShortIf for ( VariableModifiers UnannType VariableDeclaratorId : Expression ) StatementNoShortIf
+OptionalIdentifier Identifier
+OptionalIdentifier
+BreakStatement break OptionalIdentifier ;
+ContinueStatement continue OptionalIdentifier ;
+ReturnStatement return OptionalExpression ;
+ThrowStatement throw Expression ;
+SynchronizedStatement synchronized ( Expression ) Block
+TryStatement try Block Catches 
+TryStatement try Block OptionalCatches Finally 
+TryStatement TryWithResourcesStatement
+OptionalCatches Catches
+OptionalCatches
+Catches CatchClause CatchClauses
+CatchClauses CatchClause CatchClauses
+CatchClauses
+CatchClause catch ( CatchFormalParameter ) Block
+CatchFormalParameter VariableModifiers CatchType VariableDeclaratorId
+CatchType UnannClassType RepeatedOrClassTypes
+RepeatedOrClassTypes | ClassType RepeatedOrClassTypes
+RepeatedOrClassTypes
+OptionalFinally Finally
+OptionalFinally
+Finally finally Block
+TryWithResourcesStatement try ResourceSpecification Block OptionalCatches OptionalFinally
+ResourceSpecification ( ResourceList OptionalSemicolon )
+OptionalSemicolon ;
+OptionalSemicolon
+ResourceList Resource ; ResourceList
+ResourceList Resource
+Resource VariableModifiers UnannType VariableDeclaratorId = Expression
+
+Primary PrimaryNoNewArray 
+Primary ArrayCreationExpression
+PrimaryNoNewArray Literal 
+PrimaryNoNewArray ClassLiteral 
+PrimaryNoNewArray this 
+PrimaryNoNewArray TypeName . this 
+PrimaryNoNewArray ( Expression ) 
+PrimaryNoNewArray ClassInstanceCreationExpression 
+PrimaryNoNewArray FieldAccess 
+PrimaryNoNewArray ArrayAccess 
+PrimaryNoNewArray MethodInvocation 
+PrimaryNoNewArray MethodReference
+RepeatedBrackets [ ] RepeatedBrackets
+RepeatedBrackets
+ClassLiteral TypeName RepeatedBrackets . class 
+ClassLiteral NumericType RepeatedBrackets . class 
+ClassLiteral boolean RepeatedBrackets . class 
+ClassLiteral void . class
+ClassInstanceCreationExpression UnqualifiedClassInstanceCreationExpression 
+ClassInstanceCreationExpression ExpressionName . UnqualifiedClassInstanceCreationExpression 
+ClassInstanceCreationExpression Primary . UnqualifiedClassInstanceCreationExpression
+UnqualifiedClassInstanceCreationExpression new OptionalTypeArguments ClassOrInterfaceTypeToInstantiate ( OptionalArgumentList ) OptionalClassBody
+ClassOrInterfaceTypeToInstantiate Annotations Identifier RepeatDottedAnnotationsIdentifier OptionalTypeArgumentsOrDiamond
+RepeatDottedAnnotationsIdentifier . Annotations Identifier RepeatDottedAnnotationsIdentifier
+RepeatDottedAnnotationsIdentiifer
+OptionalTypeArgumentsOrDiamond TypeArgumentsOrDiamond
+OptionalTypeArgumentsOrDiamond
+TypeArgumentsOrDiamond TypeArguments 
+TypeArgumentsOrDiamond <>
+FieldAccess Primary . Identifier 
+FieldAccess super . Identifier 
+FieldAccess TypeName . super . Identifier
+ArrayAccess ExpressionName [ Expression ] 
+ArrayAccess PrimaryNoNewArray [ Expression ]
+MethodInvocation MethodName ( OptionalArgumentList ) 
+MethodInvocation TypeName . OptionalTypeArguments Identifier ( OptionalArgumentList ) 
+MethodInvocation ExpressionName . OptionalTypeArguments Identifier ( OptionalArgumentList ) 
+MethodInvocation Primary . OptionalTypeArguments Identifier ( OptionalArgumentList ) 
+MethodInvocation super . OptionalTypeArguments Identifier ( OptionalArgumentList ) 
+MethodInvocation TypeName . super . OptionalTypeArguments Identifier ( OptionalArgumentList )
+ArgumentList Expression , ArgumentList
+ArgumentList Expression
+MethodReference ExpressionName :: OptionalTypeArguments Identifier 
+MethodReference ReferenceType :: OptionalTypeArguments Identifier 
+MethodReference Primary :: OptionalTypeArguments Identifier 
+MethodReference super :: OptionalTypeArguments Identifier 
+MethodReference TypeName . super :: OptionalTypeArguments Identifier 
+MethodReference ClassType :: OptionalTypeArguments new 
+MethodReference ArrayType :: new
+ArrayCreationExpression new PrimitiveType DimExprs OptionalDims 
+ArrayCreationExpression new ClassOrInterfaceType DimExprs OptionalDims 
+ArrayCreationExpression new PrimitiveType Dims ArrayInitializer 
+ArrayCreationExpression new ClassOrInterfaceType Dims ArrayInitializer
+DimExprs DimExpr DimExprs
+DimExprs DimExpr
+DimExpr Annotations [ Expression ]
+Expression LambdaExpression 
+Expression AssignmentExpression
+LambdaExpression LambdaParameters -> LambdaBody
+LambdaParameters Identifier 
+LambdaParameters ( OptionalFormalParameterList ) 
+LambdaParameters ( InferredFormalParameterList )
+InferredFormalParameterList Identifier , InferredFormalParameterList
+InferredFormalParameterList Identifier
+LambdaBody Expression 
+LambdaBody Block
+AssignmentExpression ConditionalExpression 
+AssignmentExpression Assignment
+Assignment LeftHandSide AssignmentOperator Expression
+LeftHandSide ExpressionName 
+LeftHandSide FieldAccess 
+LeftHandSide ArrayAccess
+AssignmentOperator =
+AssignmentOperator *=
+AssignmentOperator /=
+AssignmentOperator %=
+AssignmentOperator +=
+AssignmentOperator -=
+AssignmentOperator <<=
+AssignmentOperator >>=
+AssignmentOperator >>>=
+AssignmentOperator &=
+AssignmentOperator ^=
+AssignmentOperator |=
+ConditionalExpression ConditionalOrExpression 
+ConditionalExpression ConditionalOrExpression ? Expression : ConditionalExpression 
+ConditionalExpression ConditionalOrExpression ? Expression : LambdaExpression 
+ConditionalOrExpression ConditionalAndExpression 
+ConditionalOrExpression ConditionalOrExpression || ConditionalAndExpression
+ConditionalAndExpression InclusiveOrExpression 
+ConditionalAndExpression ConditionalAndExpression && InclusiveOrExpression
+InclusiveOrExpression ExclusiveOrExpression 
+InclusiveOrExpression InclusiveOrExpression | ExclusiveOrExpression
+ExclusiveOrExpression AndExpression 
+ExclusiveOrExpression ExclusiveOrExpression ^ AndExpression
+AndExpression EqualityExpression 
+AndExpression AndExpression & EqualityExpression
+EqualityExpression RelationalExpression 
+EqualityExpression EqualityExpression == RelationalExpression 
+EqualityExpression EqualityExpression != RelationalExpression
+RelationalExpression ShiftExpression 
+RelationalExpression RelationalExpression < ShiftExpression 
+RelationalExpression RelationalExpression > ShiftExpression 
+RelationalExpression RelationalExpression <= ShiftExpression 
+RelationalExpression RelationalExpression >= ShiftExpression 
+RelationalExpression RelationalExpression instanceof ReferenceType
+ShiftExpression AdditiveExpression 
+ShiftExpression ShiftExpression << AdditiveExpression 
+ShiftExpression ShiftExpression >> AdditiveExpression 
+ShiftExpression ShiftExpression >>> AdditiveExpression
+AdditiveExpression MultiplicativeExpression 
+AdditiveExpression AdditiveExpression + MultiplicativeExpression 
+AdditiveExpression AdditiveExpression - MultiplicativeExpression
+MultiplicativeExpression UnaryExpression 
+MultiplicativeExpression MultiplicativeExpression * UnaryExpression 
+MultiplicativeExpression MultiplicativeExpression / UnaryExpression 
+MultiplicativeExpression MultiplicativeExpression % UnaryExpression
+UnaryExpression PreIncrementExpression 
+UnaryExpression PreDecrementExpression 
+UnaryExpression + UnaryExpression 
+UnaryExpression - UnaryExpression 
+UnaryExpression UnaryExpressionNotPlusMinus
+PreIncrementExpression ++ UnaryExpression
+PreDecrementExpression -- UnaryExpression
+UnaryExpressionNotPlusMinus PostfixExpression 
+UnaryExpressionNotPlusMinus ~ UnaryExpression 
+UnaryExpressionNotPlusMinus ! UnaryExpression 
+UnaryExpressionNotPlusMinus CastExpression
+PostfixExpression Primary 
+PostfixExpression ExpressionName 
+PostfixExpression PostIncrementExpression 
+PostfixExpression PostDecrementExpression
+PostIncrementExpression PostfixExpression ++
+PostDecrementExpression PostfixExpression --
+CastExpression ( PrimitiveType ) UnaryExpression 
+CastExpression ( ReferenceType AdditionalBounds ) UnaryExpressionNotPlusMinus 
+CastExpression ( ReferenceType AdditionalBounds ) LambdaExpression 
+ConstantExpression Expression
