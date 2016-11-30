@@ -41,7 +41,8 @@
 (defun list-to-clsset (lst hash-fn eq-fn)
   (let ((set (make-clsset hash-fn eq-fn)))
     (loop :for item :in lst
-          :do (setf (get-clsset item set) T))))
+          :do (setf (get-clsset item set) T))
+    set))
 
 (defun clsset-to-list (set)
   (loop :for key :being :the :hash-keys :in (internal-hash set)

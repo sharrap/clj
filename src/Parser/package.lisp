@@ -1,6 +1,6 @@
 (defpackage :clj.parser
   (:use :cl :clj.utils :clj.lexer :clj.tok)
-  (:export #:parse-earley))
+  (:export #:parse-earley #:read-grammar))
 
 (load "src/Parser/TreeNode.lisp")
 (load "src/Parser/Grammar.lisp")

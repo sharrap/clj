@@ -26,13 +26,14 @@
           :collect (make-instance 'Production :lhs (car prod) :rhs (cdr prod)))))
 
 (defun make-grammar (productions start)
-  (let ((symbols (list-to-clsset (apply #'append
-                                        (mapcar (lambda (x)
-                                                 (cons (production-lhs x) (production-rhs x)))
-                                                productions))))
-        (nonterminals (list-to-clsset (mapcar production-lhs productions) #'sxhash #'eq))
-        (terminals (clsset-difference symbols nonterminals)))
-    (make-instance 'Gramar :start        start
+  (let* ((symbols (list-to-clsset (apply #'append
+                                         (mapcar (lambda (x)
+                                                  (cons (production-lhs x) (production-rhs x)))
+                                                 productions))
+                                  #'sxhash #'eq))
+         (nonterminals (list-to-clsset (mapcar #'production-lhs productions) #'sxhash #'eq))
+         (terminals (clsset-difference symbols nonterminals)))
+    (make-instance 'Grammar :start        start
                            :terminals    terminals
                            :nonterminals nonterminals
                            :symbols      symbols
