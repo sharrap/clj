@@ -11,12 +11,15 @@
   ((lhs :accessor production-lhs :initform NIL :initarg :lhs)
    (rhs :accessor production-rhs :initform NIL :initarg :rhs)))
 
+(defun productions-expanding (grammar symbol)
+  (remove-if-not (lambda (x) (eq? symbol (production-lhs x))) (grammar-productions grammar)))
+
 (defun production-equals (p1 p2)
   (and (eq (production-lhs p1) (production-lhs p2))
        (equal (production-rhs p1) (production-rhs p2))))
 
 (defun read-productions (prodstring)
-  (let ((words (mapcar (lambda (x) (mapcar intern (split-sequence #\ x) :remove-empty T))
+  (let ((words (mapcar (lambda (x) (mapcar intern (split-sequence #\  x) :remove-empty T))
                        (split-sequence #\newline prodstring :remove-empty T))))
     (loop :for prod :in words
           :unless (not prod)
