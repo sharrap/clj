@@ -1,9 +1,9 @@
 (defpackage :clj.utils
   (:use :cl)
-  (:export #:make-clsset #:get-clsset #:list-to-clsset
+  (:export #:make-clsset #:get-clsset #:list-to-clsset #:clsset-to-list
            #:clsset-union #:clsset-intersection #:clsset-difference
            #:enqueue #:dequeue #:make-queue #:queue-empty
-           #:curry #:take #:istream #:istream-read #:istream-next
+           #:curry #:take
            #:hash-add-list #:clshash-add-list #:hash-from-list
            #:split-when-1 #:split-when #:findchr
            #:compose2 #:compose #:copylst #:uniq #:uniq-cls
@@ -17,6 +17,5 @@
 (load "src/Utils/Set.lisp")
 (load "src/Utils/HashTable.lisp")
 (load "src/Utils/Sequences.lisp")
-(load "src/Utils/Stream.lisp")
 (load "src/Utils/List.lisp")
 (load "src/Utils/Queue.lisp")

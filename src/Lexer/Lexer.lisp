@@ -1,17 +1,8 @@
 (in-package :clj.lexer)
 
-;;Lex a token by repeatedly calling the current state on the next input.
-(defun do-lex (state inp)
-  (let ((ans (funcall state (istream-read inp))))
-    (cond ((typep ans 'Token) ans)
-          (ans (do-lex ans (istream-next inp)))
-          (T (progn (istream-next inp))
-                    ans))))
-
-;;Lex a token from the input straem and return it.
-;;If the top of the input stream is already a token, do nothing.
-(defun lex-next-token (inp)
-  (assert (typep inp 'istream))
-  (when (characterp (istream-read inp))
-    (setf (istream-next inp) (do-lex #'start-state inp)))
-  (istream-read inp))
+;;Lex an entire program and return a list of tokens
+(defun lex-program (inp)
+  (loop :for c := (read-char inp nil :eof) :then (if (typep token 'Token) c (read-char inp nil :eof))
+        :for token := (funcall #'start-state (if (eq c :eof) #\newline c)) :then (funcall (if (or (not token) (typep token 'Token)) #'start-state token) (if (eq c :eof) #\newline c))
+        :when (typep token 'Token) :collect token :into tokens
+        :when (eq c :eof) :do (return (if (or (not token) (typep token 'Token)) tokens nil))))

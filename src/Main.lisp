@@ -1,7 +1,6 @@
 (load "src/Tokens/package.lisp")
 (load "src/Utils/package.lisp")
 (load "src/Lexer/package.lisp")
-(load "src/Parser/NFA/package.lisp")
 (load "src/Parser/package.lisp")
 
 (defun start (stream)
@@ -14,7 +13,12 @@
                (start stream))
         NIL)))
 
+(defun print-tokens (tokens)
+  (loop :for token :in tokens
+        :do (format t "~a ~a~%" (clj.lexer:token-type token) (clj.lexer:token-value token))))
+
 (defun main ()
   (let ((stream (make-instance 'clj.utils:istream :stream *standard-input* :top NIL)))
-    (clj.parser:do-parse stream)))
+    (print-tokens (clj.lexer:lex-program *standard-input*))))
+    ;(clj.parser:parse-earley stream)))
     ;(start stream)))

@@ -25,7 +25,7 @@
   (make-item (item-rule item) (+ (item-dot item) 1) (item-prev-state item) (cons tree (item-subtrees item))))
 
 (defun item-tree (item)
-  (make-instance 'TreeNode :value (make-instance 'Token :kind (production-lhs (item-rule item)) :lexeme "") :children (reverse (item-subtrees item))))
+  (make-instance 'TreeNode :value (make-instance 'Token :type (production-lhs (item-rule item)) :value "") :children (reverse (item-subtrees item))))
 
 (defstruct StateSet
   (queue (make-queue))
@@ -58,7 +58,7 @@
                     :else :do
                        (progn (loop :for production :in (productions-expanding grammar (next-symbol item))
                                     :do (ss-add state-set (make-instance 'Item :rule production :dot 0 :prev-state i)))
-                              (when (and (< index length) (eq (token-kind (aref input i)) (item-next-symbol item)))
+                              (when (and (< index length) (eq (token-type (aref input i)) (item-next-symbol item)))
                                     (ss-add (aref state-sets (+ index 1)) (item-advance item (make-instance 'TreeNode :value (aref input i))))))))
     (if (ss-is-empty (aref state-sets length))
         nil

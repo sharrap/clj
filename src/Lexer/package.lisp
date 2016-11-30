@@ -1,6 +1,6 @@
 (defpackage :clj.lexer
   (:use :cl :clj.utils :clj.tok)
-  (:export #:Token #:lex-next-token
+  (:export #:Token #:lex-program
            #:token-type #:token-value #:split-rshift))
 
 ;;;clj.lexer implements a lexer which is intended to be used token-by-token,

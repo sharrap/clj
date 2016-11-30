@@ -43,6 +43,10 @@
     (loop :for item :in lst
           :do (setf (get-clsset item set) T))))
 
+(defun clsset-to-list (set)
+  (loop :for key :being :the :hash-keys :in (internal-hash set)
+        :collect key))
+
 ;Assume that the two have the same hash and equality functions
 (defun clsset-union (set1 set2)
   (let ((result (make-clsset (hashf set1) (eqf set1))))

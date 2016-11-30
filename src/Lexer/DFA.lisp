@@ -100,6 +100,7 @@
     ("|"    . |or|)
     ("||"   . |boolor|)
     ("|="   . |orassign|)
+    ("<>"   . |diamond|)
     ("->"   . |rarrow|))
   *operator-hash*)
 
@@ -453,6 +454,7 @@
   ((and (digit-char-p ch)
         (eql str '(#\-))) gotom decnum-state)
   (ismem #\< "<" record)
+  (ismem #\> "<" record)
   (ismem #\> ">" record)
   (ismem #\& "&" record)
   (ismem #\| "|" record)
