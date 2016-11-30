@@ -45,8 +45,8 @@
     set))
 
 (defun clsset-to-list (set)
-  (loop :for key :being :the :hash-keys :in (internal-hash set)
-        :collect key))
+  (apply #'append (loop :for vals :being :the :hash-values :in (internal-hash set)
+                        :collect vals)))
 
 ;Assume that the two have the same hash and equality functions
 (defun clsset-union (set1 set2)

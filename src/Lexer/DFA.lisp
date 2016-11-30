@@ -101,7 +101,21 @@
     ("||"   . |boolor|)
     ("|="   . |orassign|)
     ("<>"   . |diamond|)
-    ("->"   . |rarrow|))
+    ("->"   . |rarrow|)
+    ("{"    . |lbrace|)
+    ("}"    . |rbrace|)
+    ("["    . |lbrack|)
+    ("]"    . |rbrack|)
+    ("("    . |lparen|)
+    (")"    . |rparen|)
+    (","    . |comma|)
+    (";"    . |semi|)
+    ("@"    . |at|)
+    ("?"    . |question|)
+    (":"    . |colon|)
+    ("::"   . |twocolons|)
+    ("."    . |dot|)
+    ("..."  . |threedots|))
   *operator-hash*)
 
 (loop for hash in (list *operator-hash* *keyword-hash*) do
@@ -131,17 +145,7 @@
 ;;and need not be separated by whitespace.
 (defun emit-separator (ch)
   (make-instance 'Token :value NIL :type
-    (case ch
-      (#\{ '|lbrace|)
-      (#\} '|rbrace|)
-      (#\[ '|lbrack|)
-      (#\] '|rbrack|)
-      (#\( '|lparen|)
-      (#\) '|rparen|)
-      (#\, '|comma|)
-      (#\; '|semi|)
-      (#\@ '|at|)
-      (#\? '|question|))))
+    (gethash (string ch) *operator-hash*)))
 
 ;;Operators are characters used in expressions (roughly)
 ;;This distinction is a bit hairy. The main difference is that

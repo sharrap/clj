@@ -1,3 +1,13 @@
+Literal intlit
+Literal longlit
+Literal true
+Literal false
+Literal null
+Literal strlit
+Literal floatlit
+Literal doublelit
+Literal charlit
+
 Type PrimitiveType 
 Type ReferenceType
 PrimitiveType Annotations NumericType 
@@ -16,17 +26,17 @@ FloatingPointType double
 ReferenceType ClassOrInterfaceType
 ReferenceType TypeVariable
 ReferenceType ArrayType
-ClassOrInterfaceType Annotations Identifier OptionalTypeArguments
-ClassOrInterfaceType ClassOrInterfaceType . Annotations Identifier OptionalTypeArguments
+ClassOrInterfaceType Annotations identifiger OptionalTypeArguments
+ClassOrInterfaceType ClassOrInterfaceType . Annotations identifiger OptionalTypeArguments
 OptionalTypeArguments TypeArguments
 OptionalTypeArguments
-TypeVariable Annotations Identifier
+TypeVariable Annotations identifiger
 ArrayType PrimitiveType Dims
 ArrayType ClassOrInterfaceType Dims 
 ArrayType TypeVariable Dims
 Dims Annotations [ ]
 Dims Annotations [ ] Dims
-TypeParameter TypeParameterModifiers Identifier OptionalTypeBound
+TypeParameter TypeParameterModifiers identifiger OptionalTypeBound
 TypeParameterModifiers TypeParameterModifier TypeParameterModifiers
 TypeParameterModifiers
 TypeParameterModifier Annotation
@@ -48,28 +58,28 @@ OptionalWildcardBounds
 WildcardBounds extends ReferenceType 
 WildcardBounds super ReferenceType
 
-TypeName Identifier 
-TypeName PackageOrTypeName . Identifier
-PackageOrTypeName Identifier 
-PackageOrTypeName PackageOrTypeName . Identifier
-ExpressionName Identifier 
-ExpressionName AmbiguousName . Identifier
-MethodName Identifier 
-PackageName Identifier 
-PackageName PackageName . Identifier
-AmbiguousName Identifier 
-AmbiguousName AmbiguousName . Identifier
+TypeName identifiger 
+TypeName PackageOrTypeName . identifiger
+PackageOrTypeName identifiger 
+PackageOrTypeName PackageOrTypeName . identifiger
+ExpressionName identifiger 
+ExpressionName AmbiguousName . identifiger
+MethodName identifiger 
+PackageName identifiger 
+PackageName PackageName . identifiger
+AmbiguousName identifiger 
+AmbiguousName AmbiguousName . identifiger
 
-CompilationUnit OptionalPackageDeclaration ImportDeclarations TypeDeclarations
+CompilationUnit OptionalPackageDeclaration ImportDeclarations TypeDeclarations eof
 OptionalPackageDeclaration PackageDeclaration
 OptionalPackageDeclaration
 ImportDeclarations ImportDeclaration ImportDeclarations
 ImportDeclarations
 TypeDeclarations TypeDeclaration TypeDeclarations
 TypeDeclarations
-PackageDeclaration PackageModifiers package Identifier DottedIdentifiers ;
-DottedIdentifiers . Identifier
-DottedIdentifiers
+PackageDeclaration PackageModifiers package identifiger Dottedidentifigers ;
+Dottedidentifigers . identifiger
+Dottedidentifigers
 PackageModifiers PackageModifier PackageModifiers
 PackageModifiers
 PackageModifier Annotation
@@ -79,7 +89,7 @@ ImportDeclaration SingleStaticImportDeclaration
 ImportDeclaration StaticImportOnDemandDeclaration
 SingleTypeImportDeclaration import TypeName ;
 TypeImportOnDemandDeclaration import PackageOrTypeName . * ;
-SingleStaticImportDeclaration import static TypeName . Identifier ;
+SingleStaticImportDeclaration import static TypeName . identifiger ;
 StaticImportOnDemandDeclaration import static TypeName . * ;
 TypeDeclaration ClassDeclaration 
 TypeDeclaration InterfaceDeclaration 
@@ -87,7 +97,7 @@ TypeDeclaration ;
 
 ClassDeclaration NormalClassDeclaration 
 ClassDeclaration EnumDeclaration
-NormalClassDeclaration ClassModifiers class Identifier OptionalTypeParameters OptionalSuperclass OptionalSuperinterfaces ClassBody
+NormalClassDeclaration ClassModifiers class identifiger OptionalTypeParameters OptionalSuperclass OptionalSuperinterfaces ClassBody
 ClassModifiers ClassModifier ClassModifiers
 ClassModifiers
 ClassModifier Annotation
@@ -138,7 +148,7 @@ VariableDeclaratorList VariableDeclarator , VariableDeclaratorList
 VariableDeclaratorList VariableDeclarator
 VariableDeclarator VariableDeclaratorId
 VariableDeclarator VariableDeclaratorId = VariableInitializer
-VariableDeclaratorId Identifier OptionalDims
+VariableDeclaratorId identifiger OptionalDims
 OptionalDims Dims
 OptionalDims
 VariableInitializer Expression 
@@ -150,9 +160,9 @@ UnannPrimitiveType boolean
 UnannReferenceType UnannClassOrInterfaceType 
 UnannReferenceType UnannTypeVariable 
 UnannReferenceType UnannArrayType
-UnannClassOrInterfaceType Identifier OptionalTypeArguments 
-UnannClassOrInterfaceType UnannClassOrInterfaceType . Annotations Identifier OptionalTypeArguments
-UnannTypeVariable Identifier
+UnannClassOrInterfaceType identifiger OptionalTypeArguments 
+UnannClassOrInterfaceType UnannClassOrInterfaceType . Annotations identifiger OptionalTypeArguments
+UnannTypeVariable identifiger
 UnannArrayType UnannPrimitiveType Dims 
 UnannArrayType UnannClassOrInterfaceType Dims 
 UnannArrayType UnannTypeVariable Dims
@@ -175,7 +185,7 @@ OptionalThrows Throws
 OptionalThrows
 Result UnannType 
 Result void
-MethodDeclarator Identifier ( OptionalFormalParameterList ) OptionalDims
+MethodDeclarator identifiger ( OptionalFormalParameterList ) OptionalDims
 OptionalFormalParameterList FormalParameterList
 OptionalFormalParameterList
 FormalParameterList ReceiverParameter 
@@ -193,7 +203,7 @@ VariableModifier final
 LastFormalParameter VariableModifiers UnannType Annotations ... VariableDeclaratorId 
 LastFormalParameter FormalParameter
 ReceiverParameter Annotations UnannType this
-ReceiverParameter Annotations UnannType Identifier . this
+ReceiverParameter Annotations UnannType identifiger . this
 Throws throws ExceptionTypeList
 ExceptionTypeList ExceptionType , ExceptionTypeList
 ExceptionTypeList ExceptionType
@@ -211,7 +221,7 @@ ConstructorModifier public
 ConstructorModifier protected
 ConstructorModifier private
 ConstructorDeclarator OptionalTypeParameters SimpleTypeName ( OptionalFormalParameterList )
-SimpleTypeName Identifier
+SimpleTypeName identifiger
 ConstructorBody { OptionalExplicitConstructorInvocation OptionalBlockStatements }
 OptionalExplicitConstructorInvocation ExplicitConstructorInvocation
 OptionalExplicitConstructorInvocation
@@ -223,7 +233,7 @@ OptionalArgumentList ArgumentList
 OptionalArgumentList
 OptionalBlockStatements BlockStatements
 OptionalBlockStatements
-EnumDeclaration ClassModifiers enum Identifier OptionalSuperinterfaces EnumBody
+EnumDeclaration ClassModifiers enum identifiger OptionalSuperinterfaces EnumBody
 EnumBody { OptionalEnumConstantList OptionalComma OptionalEnumBodyDeclarations }
 OptionalComma ,
 OptionalComma
@@ -231,7 +241,7 @@ OptionalEnumConstantList EnumConstantList
 OptionalEnumConstantList
 EnumConstantList EnumConstant , EnumConstantList
 EnumConstantList EnumConstant
-EnumConstant EnumConstantModifiers Identifier OptionalParenthesizedArgumentList OptionalClassBody
+EnumConstant EnumConstantModifiers identifiger OptionalParenthesizedArgumentList OptionalClassBody
 OptionalParenthesizedArgumentList ( OptionalArgumentList )
 OptionalParenthesizedArgumentList
 EnumConstantModifiers EnumConstantModifier EnumConstantModifiers
@@ -246,7 +256,7 @@ OptionalClassBody
 
 InterfaceDeclaration NormalInterfaceDeclaration 
 InterfaceDeclaration AnnotationTypeDeclaration
-NormalInterfaceDeclaration InterfaceModifiers interface Identifier OptionalTypeParameters OptionalExtendsInterfaces InterfaceBody
+NormalInterfaceDeclaration InterfaceModifiers interface identifiger OptionalTypeParameters OptionalExtendsInterfaces InterfaceBody
 InterfaceModifiers InterfaceModifier InterfaceModifiers
 InterfaceModifiers
 InterfaceModifier Annotation
@@ -283,7 +293,7 @@ InterfaceMethodModifier abstract
 InterfaceMethodModifier default
 InterfaceMethodModifier static
 InterfaceMethodModifier strictfp
-AnnotationTypeDeclaration InterfaceModifiers @ interface Identifier AnnotationTypeBody
+AnnotationTypeDeclaration InterfaceModifiers @ interface identifiger AnnotationTypeBody
 AnnotationTypeBody { AnnotationTypeMemberDeclarations }
 AnnotationTypeMemberDeclarations AnnotationTypeMemberDeclaration AnnotationTypeMemberDeclarations
 AnnotationTypeMemberDeclarations
@@ -292,7 +302,7 @@ AnnotationTypeMemberDeclaration ConstantDeclaration
 AnnotationTypeMemberDeclaration ClassDeclaration 
 AnnotationTypeMemberDeclaration InterfaceDeclaration 
 AnnotationTypeMemberDeclaration ;
-AnnotationTypeElementDeclaration AnnotationTypeElementModifiers UnannType Identifier ( ) OptionalDims OptionalDefaultValue ;
+AnnotationTypeElementDeclaration AnnotationTypeElementModifiers UnannType identifiger ( ) OptionalDims OptionalDefaultValue ;
 AnnotationTypeElementModifiers AnnotationTypeElementModifier AnnotationTypeElementModifiers
 AnnotationTypeElementModifiers
 AnnotationTypeElementModifier Annotation
@@ -309,7 +319,7 @@ OptionalElementValuePairList ElementValuePairList
 OptionalElementValuePairList
 ElementValuePairList ElementValuePair , ElementValuePairList
 ElementValuePairList ElementValuePair
-ElementValuePair Identifier = ElementValue
+ElementValuePair identifiger = ElementValue
 ElementValue ConditionalExpression 
 ElementValue ElementValueArrayInitializer 
 ElementValue Annotation
@@ -361,8 +371,8 @@ StatementWithoutTrailingSubstatement SynchronizedStatement
 StatementWithoutTrailingSubstatement ThrowStatement 
 StatementWithoutTrailingSubstatement TryStatement
 EmptyStatement ;
-LabeledStatement Identifier : Statement
-LabeledStatementNoShortIf Identifier : StatementNoShortIf
+LabeledStatement identifiger : Statement
+LabeledStatementNoShortIf identifiger : StatementNoShortIf
 ExpressionStatement StatementExpression ;
 StatementExpression Assignment 
 StatementExpression PreIncrementExpression 
@@ -387,7 +397,7 @@ SwitchLabels SwitchLabel RepeatSwitchLabel
 SwitchLabel case ConstantExpression : 
 SwitchLabel case EnumConstantName : 
 SwitchLabel default :
-EnumConstantName Identifier
+EnumConstantName identifiger
 WhileStatement while ( Expression ) Statement
 WhileStatementNoShortIf while ( Expression ) StatementNoShortIf
 DoStatement do Statement while ( Expression ) ;
@@ -410,10 +420,10 @@ StatementExpressionList StatementExpression , StatementExpressionList
 StatementExpressionList StatementExpression
 EnhancedForStatement for ( VariableModifiers UnannType VariableDeclaratorId : Expression ) Statement
 EnhancedForStatementNoShortIf for ( VariableModifiers UnannType VariableDeclaratorId : Expression ) StatementNoShortIf
-OptionalIdentifier Identifier
-OptionalIdentifier
-BreakStatement break OptionalIdentifier ;
-ContinueStatement continue OptionalIdentifier ;
+Optionalidentifiger identifiger
+Optionalidentifiger
+BreakStatement break Optionalidentifiger ;
+ContinueStatement continue Optionalidentifiger ;
 ReturnStatement return OptionalExpression ;
 ThrowStatement throw Expression ;
 SynchronizedStatement synchronized ( Expression ) Block
@@ -463,31 +473,31 @@ ClassInstanceCreationExpression UnqualifiedClassInstanceCreationExpression
 ClassInstanceCreationExpression ExpressionName . UnqualifiedClassInstanceCreationExpression 
 ClassInstanceCreationExpression Primary . UnqualifiedClassInstanceCreationExpression
 UnqualifiedClassInstanceCreationExpression new OptionalTypeArguments ClassOrInterfaceTypeToInstantiate ( OptionalArgumentList ) OptionalClassBody
-ClassOrInterfaceTypeToInstantiate Annotations Identifier RepeatDottedAnnotationsIdentifier OptionalTypeArgumentsOrDiamond
-RepeatDottedAnnotationsIdentifier . Annotations Identifier RepeatDottedAnnotationsIdentifier
+ClassOrInterfaceTypeToInstantiate Annotations identifiger RepeatDottedAnnotationsidentifiger OptionalTypeArgumentsOrDiamond
+RepeatDottedAnnotationsidentifiger . Annotations identifiger RepeatDottedAnnotationsidentifiger
 RepeatDottedAnnotationsIdentiifer
 OptionalTypeArgumentsOrDiamond TypeArgumentsOrDiamond
 OptionalTypeArgumentsOrDiamond
 TypeArgumentsOrDiamond TypeArguments 
 TypeArgumentsOrDiamond <>
-FieldAccess Primary . Identifier 
-FieldAccess super . Identifier 
-FieldAccess TypeName . super . Identifier
+FieldAccess Primary . identifiger 
+FieldAccess super . identifiger 
+FieldAccess TypeName . super . identifiger
 ArrayAccess ExpressionName [ Expression ] 
 ArrayAccess PrimaryNoNewArray [ Expression ]
 MethodInvocation MethodName ( OptionalArgumentList ) 
-MethodInvocation TypeName . OptionalTypeArguments Identifier ( OptionalArgumentList ) 
-MethodInvocation ExpressionName . OptionalTypeArguments Identifier ( OptionalArgumentList ) 
-MethodInvocation Primary . OptionalTypeArguments Identifier ( OptionalArgumentList ) 
-MethodInvocation super . OptionalTypeArguments Identifier ( OptionalArgumentList ) 
-MethodInvocation TypeName . super . OptionalTypeArguments Identifier ( OptionalArgumentList )
+MethodInvocation TypeName . OptionalTypeArguments identifiger ( OptionalArgumentList ) 
+MethodInvocation ExpressionName . OptionalTypeArguments identifiger ( OptionalArgumentList ) 
+MethodInvocation Primary . OptionalTypeArguments identifiger ( OptionalArgumentList ) 
+MethodInvocation super . OptionalTypeArguments identifiger ( OptionalArgumentList ) 
+MethodInvocation TypeName . super . OptionalTypeArguments identifiger ( OptionalArgumentList )
 ArgumentList Expression , ArgumentList
 ArgumentList Expression
-MethodReference ExpressionName :: OptionalTypeArguments Identifier 
-MethodReference ReferenceType :: OptionalTypeArguments Identifier 
-MethodReference Primary :: OptionalTypeArguments Identifier 
-MethodReference super :: OptionalTypeArguments Identifier 
-MethodReference TypeName . super :: OptionalTypeArguments Identifier 
+MethodReference ExpressionName :: OptionalTypeArguments identifiger 
+MethodReference ReferenceType :: OptionalTypeArguments identifiger 
+MethodReference Primary :: OptionalTypeArguments identifiger 
+MethodReference super :: OptionalTypeArguments identifiger 
+MethodReference TypeName . super :: OptionalTypeArguments identifiger 
 MethodReference ClassType :: OptionalTypeArguments new 
 MethodReference ArrayType :: new
 ArrayCreationExpression new PrimitiveType DimExprs OptionalDims 
@@ -500,11 +510,11 @@ DimExpr Annotations [ Expression ]
 Expression LambdaExpression 
 Expression AssignmentExpression
 LambdaExpression LambdaParameters -> LambdaBody
-LambdaParameters Identifier 
+LambdaParameters identifiger 
 LambdaParameters ( OptionalFormalParameterList ) 
 LambdaParameters ( InferredFormalParameterList )
-InferredFormalParameterList Identifier , InferredFormalParameterList
-InferredFormalParameterList Identifier
+InferredFormalParameterList identifiger , InferredFormalParameterList
+InferredFormalParameterList identifiger
 LambdaBody Expression 
 LambdaBody Block
 AssignmentExpression ConditionalExpression 
