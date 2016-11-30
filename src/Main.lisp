@@ -10,11 +10,13 @@
 (defun file-contents (file)
   (with-open-file (stream file)
     (loop :for line := (read-line stream nil)
-          :while line
+          :if line
           :collect line :into lines
-          :finally (reduce #'(lambda (x y) (concatenate 'string x (string #\newline) y)) lines))))
+          :else :do (return (reduce #'(lambda (x y) (concatenate 'string x (string #\newline) y)) lines)))))
 
-(defparameter *java-grammar* (clj.parser:read-grammar (file-contents "src/parser/java18.grammar") (intern "CompilationUnit" :clj.lexer)))
+(defparameter *java-grammar-string* (file-contents "src/Parser/java18.grammar"))
+
+(defparameter *java-grammar* (clj.parser:read-grammar *java-grammar-string* (intern "CompilationUnit" :clj.lexer)))
 (defparameter *test-grammar* (clj.parser:read-grammar
 "S expr eof
 expr expr + term
@@ -25,7 +27,8 @@ term identifier"
 (defun main ()
   (let* ((tokens (clj.lexer:lex-program *standard-input*))
          (tokens-vec (make-array (length tokens) :initial-contents tokens))
-         (grammar *test-grammar*))
-    (print-tokens tokens)
-    (clj.parser:print-grammar grammar)
+         (grammar *java-grammar*))
+    ;(print-tokens tokens)
+    ;(format t "~a~%" *java-grammar-string*)
+    ;(clj.parser:print-grammar grammar)
     (clj.parser:print-tree (clj.parser:parse-earley grammar tokens-vec))))
